@@ -149,4 +149,12 @@ audio.cpp runs as a managed native server (no Python venv, no
 `transformers` conflict). Only the downloaded GGUF counts toward
 [sidecar disk usage](disk-usage.md).
 
-The catalogue checks the exact Breeze Q8_0 package inside the shared GGUF repository. Other audio.cpp packages do not make Breeze appear installed. Required weight files must also satisfy the normal weight-size floor; empty or truncated placeholders remain incomplete. Broader native model discovery and execution are still pending integration.
+The catalogue checks the exact Breeze Q8_0 package inside the shared GGUF repository. Other audio.cpp packages do not make Breeze appear installed. Required weight files must also satisfy the normal weight-size floor; empty or truncated placeholders remain incomplete. Support for additional native model families is still pending integration.
+
+**Windows RX 7900 XTX smoke test (2026-10-25):** audio.cpp v0.7.4 selected
+`vulkan` device 0 (`AMD Radeon RX 7900 XTX`) and successfully generated
+6.56 seconds of non-silent English speech at 24 kHz with the pinned Breeze
+Q8_0 GGUF, after local acceptance of its license. The model file contained
+5,079,668,352 bytes. GPU selection and real synthesis succeeded on this
+host; the Vulkan binary's own warning notes that performance and model
+coverage may be lower than with CUDA.

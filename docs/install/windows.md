@@ -143,19 +143,21 @@ $env:OMNIVOICE_ASR_BACKEND = 'pytorch-whisper'
 $env:OMNIVOICE_PYTORCH_ASR_MODEL = 'openai/whisper-base'
 ```
 
-For synthesis, the bundled OmniVoice PyTorch engine supports the ROCm device
-path. Actual model inference must be tested separately; an installed ROCm wheel
-or engine's GPU badge does not guarantee each TTS model's kernels work. The
-`omnivoice-subprocess` option offers a process-isolated fallback with the same
-model. For a different GPU execution stack, audio.cpp uses Vulkan and does not
-depend on ROCm, but requires its own runtime and Breeze-TTS-2 model weights.
-On the RX 7900 XTX, the isolated OmniVoice child process passed a real
-start/ping/shutdown check. The audio.cpp v0.7.4 Vulkan runtime selected the AMD
-GPU with approximately 24 GB VRAM, but Breeze-TTS-2 weights were absent.
-Neither path has yet completed a TTS generation test. A separate CPU fallback,
-KittenTTS, successfully generated 5.94 seconds of English audio at 24 kHz.
-OmniVoice and Breeze-TTS-2 speech tests require explicit model-license review
-and acceptance in Model Catalogue before continuing.
+**Verified OmniVoice TTS on RX 7900 XTX:** with the model-license terms
+accepted locally, the native PyTorch/ROCm engine generated 3.71 seconds of
+non-silent German speech on `cuda:0` (HIP). The `omnivoice-subprocess` engine
+also passed its child-process health check and generated 4.12 seconds of
+non-silent German speech through its isolated ROCm process. Both checks used
+four synthesis steps on 2026-10-25. These are actual model inference results,
+although other models or GPUs still need validation.
+
+**Verified Breeze-TTS-2 on RX 7900 XTX:** audio.cpp v0.7.4 used the Vulkan
+runtime on Radeon device 0 (approximately 24 GB VRAM) to synthesize 6.56
+seconds of non-silent English speech at 24 kHz from the 4.73 GiB Q8_0 GGUF
+model, after explicit local license acceptance. Vulkan does not require
+PyTorch ROCm. Breeze-TTS-2 weights are licensed for research/non-commercial
+use; this engine only supports English and Chinese. KittenTTS, a CPU
+fallback, separately generated 5.94 seconds of English audio at 24 kHz.
 
 Other AMD paths:
 

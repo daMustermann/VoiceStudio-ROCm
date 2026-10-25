@@ -52,21 +52,23 @@ $env:OMNIVOICE_PYTORCH_ASR_MODEL = 'openai/whisper-base'
 | --- | --- | --- |
 | PyTorch / ROCm device detection | **Verified** | AMD GPU recognized through HIP / `torch.cuda` |
 | PyTorch Whisper ASR | **Verified on GPU** | German speech transcribed with `openai/whisper-base` |
-| OmniVoice TTS | **License-gated; inference not yet tested** | Native generation correctly rejects unaccepted OmniVoice/tokenizer terms |
-| OmniVoice subprocess | **Real subprocess ping passed; inference not yet tested** | Same TTS model, model-license review still required |
-| audio.cpp Vulkan runtime | **GPU detected; runtime verified** | RX 7900 XTX selected on Vulkan with ~24 GB VRAM; Breeze-TTS-2 weights and license acceptance still missing |
+| OmniVoice TTS | **Real ROCm speech generated** | German 3.71 s non-silent WAV on HIP GPU (`cuda:0`), 4 synthesis steps |
+| OmniVoice subprocess | **Real ROCm speech generated** | Isolated child passed health ping and generated 4.12 s non-silent German WAV |
+| audio.cpp / Breeze-TTS-2 | **Real Vulkan speech generated** | Radeon Vulkan device 0, Breeze Q8_0 GGUF, 6.56 s English WAV at 24 kHz |
 | KittenTTS (CPU fallback) | **Real audio generated** | 5.94 s English speech at 24 kHz, non-silent WAV; CPU-only by design |
 | faster-whisper / WhisperX (CTranslate2) | **No ROCm acceleration** | CTranslate2 does not inherit PyTorch HIP support |
 
-VoiceStudio's model manager may require acceptance of licenses for
+VoiceStudio's model manager requires per-user acceptance of the terms for
 `k2-fsa/OmniVoice` and `eustlb/higgs-audio-v2-tokenizer`; downloading models
-does not grant that acceptance. audio.cpp's Vulkan path is an alternative to
-ROCm, with its own model and license requirements. See the
+does not grant that acceptance. The two real OmniVoice syntheses above ran
+after local acceptance of those terms. Breeze-TTS-2's real Vulkan synthesis
+also followed explicit local model-license acceptance. Its research and
+non-commercial limits still apply. See the
 [full Windows ROCm guide](docs/install/windows.md#gpu-support).
 
 The live TTS smoke checks above ran on Windows with an RX 7900 XTX on
-2026-10-25. A working native-runtime probe or subprocess ping is **not** proof
-that the respective model can synthesize audio on that GPU.
+2026-10-25. They demonstrate real speech inference on the tested machine;
+other cards, models, and operating systems need their own validation.
 
 > [!IMPORTANT]
 > **The official [VoiceStudio releases](https://github.com/debpalash/VoiceStudio/releases/latest)
