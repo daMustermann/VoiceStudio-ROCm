@@ -55,6 +55,13 @@ UV_PIP_CPU_ARGS: tuple[str, ...] = (
 PYTORCH_ROCM_INDEX_URL = "https://download.pytorch.org/whl/rocm6.4"
 ROCM_TORCH_PINS: tuple[str, ...] = ("torch==2.8.0", "torchaudio==2.8.0")
 
+# Experimental native Windows ROCm 10.1 stack for the RX 7900 XTX (gfx1100).
+WINDOWS_ROCM_TORCH_INDEX = "https://stable.repo.amd.com/rocm/whl-next/"
+WINDOWS_ROCM_TORCH_PINS: tuple[str, ...] = (
+    "torch[device-gfx1100]==2.14.0+rocm10.1.0",
+    "torchaudio==2.11.0.3+rocm10.1.0",
+)
+
 UV_PIP_ROCM_ARGS: tuple[str, ...] = (
     "--extra-index-url",
     PYTORCH_ROCM_INDEX_URL,

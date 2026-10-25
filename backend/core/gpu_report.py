@@ -39,8 +39,8 @@ UNUSABLE_GPU_STATES = frozenset({
 #: What the user can honestly do about each host state, most useful first. Each
 #: is an i18n suffix (``settings.gpu_report_option_<code>``).
 _OPTIONS: dict[str, tuple[str, ...]] = {
-    # Windows: only these two exist. DirectML is not offered: torch-directml
-    # needs torch 2.4.x, which the engines here no longer support.
+    # Windows ROCm 10.1 is opt-in for gfx1100 in the fork; the localized hint
+    # explains how to install it. DirectML needs an older torch stack.
     "amd_cuda_build:win32": ("vulkan_engines", "rocm_windows_manual"),
     "amd_cpu_build:win32": ("vulkan_engines", "rocm_windows_manual"),
     "amd_rocm_no_device:win32": ("rocm_windows_manual",),

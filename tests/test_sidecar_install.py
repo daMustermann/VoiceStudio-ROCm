@@ -1464,6 +1464,34 @@ def test_rocm_host_installs_rocm_torch_for_indextts2(monkeypatch):
     assert PYTORCH_CU128_INDEX_URL not in pip
 
 
+def test_windows_rocm_10_1_installs_gfx1100_torch(monkeypatch):
+    from core.torch_indexes import WINDOWS_ROCM_TORCH_INDEX, WINDOWS_ROCM_TORCH_PINS
+
+    monkeypatch.setenv("OMNIVOICE_TORCH_VARIANT", "rocm")
+    monkeypatch.setattr(si.sys, "platform", "win32")
+    argvs = _capture_install_argvs(monkeypatch, family="cpu")
+    spec = si.get_spec("indextts2")
+    si._step_install_deps(spec, si._new_job("indextts2"))
+    pip = next(a for a in argvs if a[1:3] == ["pip", "install"])
+    assert all(pin in pip for pin in WINDOWS_ROCM_TORCH_PINS)
+    assert "--no-config" in pip
+    assert "--no-sources" in pip
+    assert pip[pip.index("--index-url") + 1] == WINDOWS_ROCM_TORCH_INDEX
+    assert "--extra-index-url" not in pip
+
+
+def test_windows_rocm_venv_detects_version_and_offers_upgrade(tmp_path, monkeypatch):
+    venv = tmp_path / ".venv"
+    version_file = venv / "Lib" / "site-packages" / "torch" / "version.py"
+    version_file.parent.mkdir(parents=True)
+    monkeypatch.setattr(si.sys, "platform", "win32")
+    version_file.write_text("__version__ = '2.8.0+rocm6.4'\nhip = '6.4'\n")
+    assert si.venv_torch_hip(venv) is True
+    assert si._venv_torch_is_rocm(venv) is False
+    version_file.write_text("__version__ = '2.14.0+rocm10.1.0'\nhip = '10.1'\n")
+    assert si._venv_torch_is_rocm(venv) is True
+
+
 def test_rocm_variant_env_opts_in_before_the_family_probe_reports_rocm(monkeypatch):
     """`OMNIVOICE_TORCH_VARIANT=rocm` is the documented opt-in; it can be set
     while the main venv swap has not landed yet (family still cpu)."""
@@ -1593,9 +1621,8 @@ def test_non_rocm_hosts_keep_installed_means_installed(monkeypatch):
     for family in ("cuda", "cpu"):
         monkeypatch.setattr(si, "_host_family", lambda f=family: f)
         assert si._healthy(spec) is True
-    # A rocm-family host with the opt-in machinery unable to select rocm
-    # (probe failure degrades _host_family to "cpu" upstream) is covered by
-    # the "cpu" case above; non-Linux never takes the rocm index at all.
+    # Windows now has its own ROCm 10.1 recipe and must offer an upgrade
+    # when an older CUDA-only wheel is still installed in the sidecar.
     monkeypatch.setattr(si.sys, "platform", "win32")
     # Windows-layout interpreter now that _venv_python asks for one:
     checkout = si.managed_checkout(spec)
@@ -1603,8 +1630,9 @@ def test_non_rocm_hosts_keep_installed_means_installed(monkeypatch):
     win_py.parent.mkdir(parents=True, exist_ok=True)
     win_py.write_text("#!fake\n")
     monkeypatch.setattr(si, "_host_family", lambda: "rocm")
-    assert si._rocm_index_url() is None
-    assert si._healthy(spec) is True
+    from core.torch_indexes import WINDOWS_ROCM_TORCH_INDEX
+    assert si._rocm_index_url() == WINDOWS_ROCM_TORCH_INDEX
+    assert si._healthy(spec) is False
 
 
 # ── Submodule trees, partial weights, and optional post-install data ──────

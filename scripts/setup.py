@@ -50,29 +50,42 @@ for _stream in (sys.stdout, sys.stderr):
 # [tool.uv.constraint-dependencies].
 ROCM_TORCH_INDEX = "https://download.pytorch.org/whl/rocm6.4"
 ROCM_TORCH_PINS = ("torch==2.8.0", "torchaudio==2.8.0", "torchvision==0.23.0")
+WINDOWS_ROCM_TORCH_INDEX = "https://stable.repo.amd.com/rocm/whl-next/"
+WINDOWS_ROCM_TORCH_PINS = (
+    "torch[device-gfx1100]==2.14.0+rocm10.1.0",
+    "torchvision[device-gfx1100]==0.29.0a0+rocm10.1.0",
+    "torchaudio==2.11.0.3+rocm10.1.0",
+)
 
 
 def _rocm_opt_in(environ=os.environ):
     """Return the ROCm wheel index when the user opted in, else None."""
     if environ.get("OMNIVOICE_TORCH_VARIANT", "").strip().lower() != "rocm":
         return None
-    return environ.get("OMNIVOICE_TORCH_INDEX") or ROCM_TORCH_INDEX
+    default_index = WINDOWS_ROCM_TORCH_INDEX if sys.platform == "win32" else ROCM_TORCH_INDEX
+    return environ.get("OMNIVOICE_TORCH_INDEX") or default_index
 
 
-def _installed_torch_is_rocm():
+def _installed_torch_is_rocm(platform=None):
     try:
         import torch  # noqa: WPS433 — deliberately lazy; torch is heavy
     except Exception:
         return False
-    return bool(getattr(torch.version, "hip", None))
+    if not getattr(torch.version, "hip", None):
+        return False
+    # An old HIP wheel is not an adequate replacement for Windows ROCm 10.1.
+    if (platform or sys.platform) == "win32":
+        return str(getattr(torch, "__version__", "")).startswith("2.14.0+rocm10.1.0")
+    return True
 
 
-def rocm_torch_reinstall_cmd(index_url, python=None):
+def rocm_torch_reinstall_cmd(index_url, python=None, platform=None):
     """`uv pip install` argv targeting THIS venv (not whatever uv guesses)."""
+    windows = (platform or sys.platform) == "win32"
     return [
-        "uv", "pip", "install", "--reinstall",
+        "uv", "pip", "install", *(["--no-config"] if windows else []), "--reinstall",
         "--python", python or sys.executable,
-        *ROCM_TORCH_PINS,
+        *(WINDOWS_ROCM_TORCH_PINS if windows else ROCM_TORCH_PINS),
         "--index-url", index_url,
     ]
 
@@ -88,8 +101,7 @@ def _ensure_rocm_torch():
     try:
         subprocess.check_call(rocm_torch_reinstall_cmd(index_url))
     except (OSError, subprocess.CalledProcessError) as exc:
-        print(f"⚠ ROCm torch install failed ({exc}); keeping the default torch build")
-        return
+        raise RuntimeError(f"ROCm torch install failed ({exc}); see the AMD ROCm 10.1 driver requirements") from exc
     print("✓ ROCm torch installed")
 
 
@@ -208,8 +220,8 @@ def main():
     if sys.platform == "darwin":
         return
 
-    # ── Step 2: opt-in AMD ROCm torch (Linux) ─────────────────────────────
-    if sys.platform.startswith("linux"):
+    # ── Step 2: opt-in AMD ROCm torch (Linux / Windows x64) ───────────────
+    if sys.platform.startswith("linux") or sys.platform == "win32":
         _ensure_rocm_torch()
 
     compat_dir = _find_compat_dir()

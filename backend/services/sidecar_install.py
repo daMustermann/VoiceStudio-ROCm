@@ -262,17 +262,19 @@ def _rocm_index_url() -> Optional[str]:
     the host probe reports family ``rocm`` (the main venv's torch exposes HIP),
     or the user opted in with ``OMNIVOICE_TORCH_VARIANT=rocm`` (covers a swap
     that has not landed yet). ``OMNIVOICE_TORCH_INDEX`` overrides the index
-    exactly as it does for the main venv. Linux only: ROCm wheels ship for
+    exactly as it does for the main venv. Linux uses the PyTorch ROCm index;
+    Windows x64 uses AMD's gfx1100 ROCm 10.1 wheel repository.
     Linux (incl. WSL2) nowhere else, and the main venv's swap degrades to a
     warning on other platforms — a sidecar install must not hard-fail where
     the main venv quietly keeps its default torch.
     """
-    if sys.platform != "linux":
+    if sys.platform not in ("linux", "win32"):
         return None
     variant = os.environ.get("OMNIVOICE_TORCH_VARIANT", "").strip().lower()
     if _host_family() == "rocm" or variant == "rocm":
-        from core.torch_indexes import PYTORCH_ROCM_INDEX_URL
-        return os.environ.get("OMNIVOICE_TORCH_INDEX") or PYTORCH_ROCM_INDEX_URL
+        from core.torch_indexes import PYTORCH_ROCM_INDEX_URL, WINDOWS_ROCM_TORCH_INDEX
+        default_index = WINDOWS_ROCM_TORCH_INDEX if sys.platform == "win32" else PYTORCH_ROCM_INDEX_URL
+        return os.environ.get("OMNIVOICE_TORCH_INDEX") or default_index
     return None
 
 
@@ -291,11 +293,13 @@ def _rocm_pin_args() -> list[str]:
         PYTORCH_ROCM_INDEX_URL,
         ROCM_TORCH_PINS,
         UV_PIP_ROCM_ARGS,
+        WINDOWS_ROCM_TORCH_PINS,
     )
 
     index = _rocm_index_url() or ""
     tail = index.rstrip("/").rsplit("/", 1)[-1]
-    tag = f"+{tail}" if tail.startswith("rocm") else ""
+    windows = sys.platform == "win32"
+    tag = f"+{tail}" if tail.startswith("rocm") and not windows else ""
     # uv must resolve against the SAME index the pins were derived from:
     # the tag above already comes from OMNIVOICE_TORCH_INDEX, so appending
     # the hard-coded public index would look a mirror's pins up on someone
@@ -306,7 +310,13 @@ def _rocm_pin_args() -> list[str]:
         else arg
         for arg in UV_PIP_ROCM_ARGS
     ]
-    return ["--no-sources", *(f"{pin}{tag}" for pin in ROCM_TORCH_PINS), *idx_args]
+    pins = WINDOWS_ROCM_TORCH_PINS if windows else ROCM_TORCH_PINS
+    return [
+        *(["--no-config"] if windows else []),
+        "--no-sources",
+        *(f"{pin}{tag}" for pin in pins),
+        *(["--index-url", index] if windows else idx_args),
+    ]
 
 
 def venv_torch_hip(venv_dir: Path) -> Optional[bool]:
@@ -316,6 +326,8 @@ def venv_torch_hip(venv_dir: Path) -> Optional[bool]:
     Reads the wheel's generated ``version.py`` instead of importing torch, so it
     is safe on every engine-list refresh."""
     matches = sorted((venv_dir / "lib").glob("python*/site-packages/torch/version.py"))
+    if not matches:
+        matches = sorted((venv_dir / "Lib" / "site-packages").glob("torch/version.py"))
     if not matches:
         return None
     try:
@@ -335,7 +347,15 @@ def _venv_torch_is_rocm(venv_dir: Path) -> bool:
     seconds the completion marker exists to avoid (see
     ``_install_marker_valid``). Missing file = no torch = not ROCm, so a
     broken deps step is offered the repair too."""
-    return bool(venv_torch_hip(venv_dir))
+    if not venv_torch_hip(venv_dir):
+        return False
+    if sys.platform == "win32":
+        version_file = venv_dir / "Lib" / "site-packages" / "torch" / "version.py"
+        try:
+            return "2.14.0+rocm10.1.0" in version_file.read_text(encoding="utf-8")
+        except OSError:
+            return False
+    return True
 
 
 def _moss_host() -> tuple[bool, str]:

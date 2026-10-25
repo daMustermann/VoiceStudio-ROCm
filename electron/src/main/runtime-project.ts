@@ -31,25 +31,32 @@ export const ROCM_TORCH_PINS = [
   'torchaudio==2.8.0',
   'torchvision==0.23.0',
 ] as const;
+// AMD's TheRock wheel repository. RX 7900 XTX = gfx1100. These versions form
+// one published ROCm 10.1 Windows stack; the frozen 2.8 stack stays on Linux.
+export const WINDOWS_ROCM_TORCH_INDEX = 'https://stable.repo.amd.com/rocm/whl-next/';
+export const WINDOWS_ROCM_TORCH_PINS = [
+  'torch[device-gfx1100]==2.14.0+rocm10.1.0',
+  'torchvision[device-gfx1100]==0.29.0a0+rocm10.1.0',
+  'torchaudio==2.11.0.3+rocm10.1.0',
+] as const;
 /**
- * Whether this OS can have the ROCm torch stack at all.
- *
- * PyTorch's ROCm index (`ROCM_TORCH_INDEX`) publishes Linux wheels only. On
- * Windows `uv pip install --index-url <rocm6.4> torch==2.8.0` finds nothing and
- * the whole runtime bootstrap fails, leaving the app unusable instead of merely
- * CPU-bound - so the opt-in is ignored there and the host resolves like any
- * other (Settings > Performance explains which engines can still use a Radeon).
- * Windows ROCm needs AMD's own wheels and a validated engine matrix; it is
- * deliberately not wired into this recipe.
+ * ROCm is opt-in: macOS does not ship ROCm PyTorch wheels. Windows has an AMD
+ * TheRock-specific recipe; it must never use the Linux-only rocm6.4 index.
  */
-export function rocmTorchApplies(platform: NodeJS.Platform = process.platform): boolean {
-  return platform !== 'win32' && platform !== 'darwin';
+export function rocmTorchApplies(
+  platform: NodeJS.Platform = process.platform,
+  arch: string = process.arch,
+): boolean {
+  return platform === 'linux' || (platform === 'win32' && arch === 'x64');
 }
 /** The user explicitly asked for ROCm torch AND this OS can have it. */
-export function rocmTorchOptIn(platform: NodeJS.Platform = process.platform): boolean {
+export function rocmTorchOptIn(
+  platform: NodeJS.Platform = process.platform,
+  arch: string = process.arch,
+): boolean {
   return (
     process.env.OMNIVOICE_TORCH_VARIANT?.trim().toLowerCase() === 'rocm' &&
-    rocmTorchApplies(platform)
+    rocmTorchApplies(platform, arch)
   );
 }
 /**
@@ -233,9 +240,8 @@ export function resolveTorchVariant(
   hasNvidia: () => boolean = () => nvidiaDriverPresent(platform),
 ): TorchChoice {
   const raw = env.OMNIVOICE_TORCH_VARIANT?.trim().toLowerCase() ?? '';
-  // ROCm wheels exist for Linux only; elsewhere the opt-in is ignored (the
-  // host is resolved like any other, never a failed bootstrap).
-  if (raw === 'rocm' && rocmTorchApplies(platform)) return { variant: 'rocm', explicit: true };
+  // Native Windows ROCm uses AMD's gfx1100 stack, enabled only by explicit opt-in.
+  if (raw === 'rocm' && rocmTorchApplies(platform, arch)) return { variant: 'rocm', explicit: true };
   if (raw === 'cuda' || raw === 'default') return { variant: 'default', explicit: true };
   if (raw === 'cpu') {
     return { variant: cpuTorchApplies(platform, arch) ? 'cpu' : 'default', explicit: true };
@@ -869,13 +875,14 @@ export async function installRuntime(
     ? ['--python', runtimePython(project)]
     : ['--managed-python', '--python', managedPythonRequest()];
   const cpuTorch = torch.variant === 'cpu';
+  const swappedTorch = cpuTorch || torch.variant === 'rocm';
   // A failed native import may leave distribution metadata intact, so uv's
   // ordinary sync would otherwise consider the broken wheel already satisfied.
   const torchPackages: readonly string[] = RUNTIME_REPAIR_PACKAGES;
   // A CPU install never syncs the lock's CUDA torch, so its repair goes through
   // the CPU pip install below instead of `uv sync --reinstall-package`.
   const repairArgs = repairPackages
-    .filter((name) => !cpuTorch || !torchPackages.includes(name))
+    .filter((name) => !swappedTorch || !torchPackages.includes(name))
     .flatMap((name) => ['--reinstall-package', name]);
   signal.throwIfAborted();
   if (repairPackages.length) {
@@ -888,7 +895,7 @@ export async function installRuntime(
   // The lock resolves torch to the CUDA build (and, on Linux, ~3 GB of nvidia-*
   // runtime wheels) for every Linux/Windows x64 host. Keep those out of a CPU
   // install; the CPU wheels are laid down right after the frozen sync.
-  const skipArgs = cpuTorch
+  const skipArgs = swappedTorch
     ? [
         ...torchPackages,
         ...cudaOnlyPackages(await readFile(join(project, 'uv.lock'), 'utf8')),
@@ -921,17 +928,22 @@ export async function installRuntime(
     signal.throwIfAborted();
   }
   if (torch.variant === 'rocm') {
+    const windows = process.platform === 'win32';
     await run(
       uv,
       [
         'pip',
         'install',
+        // pyproject.toml globally constrains torch==2.8; AMD 10.1 provides
+        // torch 2.14. --no-config isolates this deliberate opt-in override.
+        ...(windows ? ['--no-config'] : []),
         '--reinstall',
         '--python',
         runtimePython(project),
-        ...ROCM_TORCH_PINS,
+        ...(windows ? WINDOWS_ROCM_TORCH_PINS : ROCM_TORCH_PINS),
         '--index-url',
-        process.env.OMNIVOICE_TORCH_INDEX || ROCM_TORCH_INDEX,
+        process.env.OMNIVOICE_TORCH_INDEX ||
+          (windows ? WINDOWS_ROCM_TORCH_INDEX : ROCM_TORCH_INDEX),
       ],
       project,
       env,

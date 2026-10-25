@@ -14,6 +14,8 @@ import {
   NATIVE_DIAGNOSTIC_PREFIX,
   ROCM_TORCH_INDEX,
   ROCM_TORCH_PINS,
+  WINDOWS_ROCM_TORCH_INDEX,
+  WINDOWS_ROCM_TORCH_PINS,
   rocmTorchOptIn,
   RUNTIME_IMPORT_PROBE,
   RUNTIME_NATIVE_DIAGNOSTIC_PROBE,
@@ -370,11 +372,11 @@ describe('packaged runtime setup', () => {
     ]);
     expect(ROCM_TORCH_INDEX).toContain('/rocm');
   });
-  it('ignores the ROCm opt-in where PyTorch publishes no ROCm wheels', async () => {
+  it('installs AMD ROCm 10.1 gfx1100 wheels on Windows opt-in', async () => {
     forcePlatform('win32');
     const { bundle, project } = await fixture();
     vi.stubEnv('OMNIVOICE_TORCH_VARIANT', 'rocm');
-    expect(rocmTorchOptIn('win32')).toBe(false);
+    expect(rocmTorchOptIn('win32')).toBe(true);
     expect(rocmTorchOptIn('darwin')).toBe(false);
     expect(rocmTorchOptIn('linux')).toBe(true);
     const run = vi.fn(
@@ -383,12 +385,15 @@ describe('packaged runtime setup', () => {
       },
     );
     await installRuntime(bundle, project, 'uv', run, new AbortController().signal);
-    // No Linux-only index lookup that would fail the whole bootstrap...
-    const rocmLookups = run.mock.calls.filter(([, args]) =>
-      args.some((arg) => arg === ROCM_TORCH_INDEX || ROCM_TORCH_PINS.some((pin) => arg === pin)),
-    );
-    expect(rocmLookups).toEqual([]);
-    // ...and the default runtime stays reusable instead of being rebuilt forever.
+    const sync = run.mock.calls.find(([, args]) => args[0] === 'sync')?.[1];
+    expect(sync).toContain('--no-install-package');
+    expect(sync).not.toContain('nvidia-cudnn-cu12');
+    const pip = run.mock.calls.find(([, args]) => args[0] === 'pip')?.[1];
+    expect(pip).toEqual([
+      'pip', 'install', '--no-config', '--reinstall', '--python', runtimePython(project),
+      ...WINDOWS_ROCM_TORCH_PINS, '--index-url', WINDOWS_ROCM_TORCH_INDEX,
+    ]);
+    expect(pip).not.toContain(ROCM_TORCH_INDEX);
     expect(await runtimeReady(bundle, project)).toBe(true);
   });
   it('does not reuse a default runtime after ROCm is selected', async () => {

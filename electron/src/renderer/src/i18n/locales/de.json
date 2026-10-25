@@ -1414,7 +1414,7 @@
     "gpu_report_state_intel_unsupported": "{{gpu}} wurde gefunden, aber keine installierte Engine kann Intel-GPUs nutzen, daher läuft alles auf der CPU.",
     "gpu_report_state_unknown": "Der GPU-Status konnte nicht ermittelt werden.",
     "gpu_report_option_vulkan_engines": "Nutzen Sie eine Engine mit eigener GPU-Laufzeit: audio.cpp läuft über Vulkan auf AMD-Radeon-GPUs (Einstellungen → Modelle → Laufzeit installieren).",
-    "gpu_report_option_rocm_windows_manual": "PyTorch mit ROCm unter Windows wird von VoiceStudio nicht installiert. AMD veröffentlicht separate Wheels für aktuelle Radeon-Karten, sie benötigen aber ein neueres PyTorch, als die Engines hier getestet sind, und manche Engines funktionieren dann nicht. Probieren Sie es nur, wenn Sie Fehler selbst beheben können (siehe Windows-Installationsanleitung).",
+    "gpu_report_option_rocm_windows_manual": "Für die RX 7900 XTX (gfx1100) unter Windows x64: OMNIVOICE_TORCH_VARIANT=rocm setzen und Setup erneut ausführen. Dadurch wird PyTorch 2.14 mit ROCm 10.1 installiert. Experimentell: Nicht alle Engines sind kompatibel.",
     "gpu_report_option_rocm_variant_linux": "Setzen Sie OMNIVOICE_TORCH_VARIANT=rocm und führen Sie die Einrichtung erneut aus, um den ROCm-Build von PyTorch zu installieren.",
     "gpu_report_option_rocm_device_access": "Prüfen Sie, ob der amdgpu-Treiber geladen ist und Ihr Benutzer /dev/kfd öffnen kann (Gruppen render und video).",
     "gpu_report_option_reinstall_cuda_torch": "Installieren Sie die Laufzeit neu, damit der CUDA-Build von PyTorch installiert wird.",

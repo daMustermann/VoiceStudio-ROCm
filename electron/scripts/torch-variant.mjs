@@ -70,8 +70,8 @@ export async function selectTorchVariant({
 } = {}) {
   const requested = requestedTorchVariant(env);
   if (platform === 'darwin') return 'native';
-  // ROCm is Linux-only; match the packaged install's Windows fallback.
-  if (requested === 'rocm' && platform === 'linux') return 'rocm';
+  // Windows uses AMD's ROCm 10.1 gfx1100 wheels; Linux keeps its pinned recipe.
+  if (requested === 'rocm' && (platform === 'linux' || (platform === 'win32' && arch === 'x64'))) return 'rocm';
   const cpuWheelsApply =
     (platform === 'linux' && arch === 'x64') ||
     (platform === 'win32' && (arch === 'x64' || arch === 'arm64'));
@@ -85,5 +85,13 @@ export async function selectTorchVariant({
 
 /** Both variants are frozen in uv.lock; never download CUDA before swapping to CPU. */
 export function torchSyncArgs(variant) {
-  return variant === 'cpu' ? ['--no-group', 'cuda', '--group', 'cpu'] : [];
+  // A ROCm install must not pull the frozen CUDA wheels before replacing them.
+  if (variant === 'cpu') return ['--no-group', 'cuda', '--group', 'cpu'];
+  if (variant === 'rocm') return [
+    '--no-group', 'cuda', '--group', 'cpu',
+    '--no-install-package', 'torch',
+    '--no-install-package', 'torchaudio',
+    '--no-install-package', 'torchvision',
+  ];
+  return [];
 }
