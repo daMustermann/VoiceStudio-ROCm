@@ -463,6 +463,10 @@
     "working": "Processando…"
   },
   "clone": {
+    "system_audio_title": "Gravar áudio do PC",
+    "system_audio_hint": "Reproduza vídeo ou áudio e pressione Gravar e Parar. Áudio do sistema no Windows.",
+    "record_system_audio": "Gravar áudio do PC",
+    "system_audio_unavailable": "Não foi possível capturar o áudio do PC. Verifique o Windows e a partilha de ecrã.",
     "text_label": "Texto",
     "paste": "Colar",
     "paste_failed": "O acesso à área de transferência foi bloqueado. Cole diretamente no campo de texto usando o teclado.",

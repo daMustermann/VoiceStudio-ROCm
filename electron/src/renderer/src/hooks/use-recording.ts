@@ -32,20 +32,21 @@ export interface UseRecording {
   setSelectedInputId: (id: string) => void;
   channelMode: ChannelMode;
   setChannelMode: (mode: ChannelMode) => void;
-  /** Microphone RMS level, 0..1. */
+  /** Input RMS level, 0..1. */
   level: number;
   start(): Promise<void>;
   stop(): void;
 }
 
 /**
- * Microphone recording → backend denoise → `onRecorded(file)`. Falls back to
+ * Microphone / system output recording → backend denoise → `onRecorded(file)`. Falls back to
  * the raw recording when `/clean-audio` is unavailable so a missing denoiser
  * never blocks cloning.
  */
 export function useRecording(
   onRecorded: (file: File) => void,
   trackReference = true,
+  source: 'microphone' | 'system' = 'microphone',
 ): UseRecording {
   const onRecordedRef = useRef(onRecorded);
   useEffect(() => {
@@ -125,10 +126,10 @@ export function useRecording(
   }, []);
 
   useEffect(() => {
-    void refreshInputs();
+    if (source === 'microphone') void refreshInputs();
     const mediaDevices = typeof navigator === 'undefined' ? undefined : navigator.mediaDevices;
     const onChange = (): void => void refreshInputs();
-    mediaDevices?.addEventListener?.('devicechange', onChange);
+    if (source === 'microphone') mediaDevices?.addEventListener?.('devicechange', onChange);
     return () => {
       lifecycle.current++;
       cleaningRequest.current?.abort();
@@ -140,7 +141,7 @@ export function useRecording(
       clearTimer();
       releaseStream();
     };
-  }, [refreshInputs, clearTimer, releaseStream]);
+  }, [refreshInputs, clearTimer, releaseStream, source]);
 
   const finishRecording = useCallback(
     async (blob: Blob, extension: string) => {
@@ -181,16 +182,25 @@ export function useRecording(
     startingRef.current = true;
     setIsStarting(true);
     try {
-      const stream = await navigator.mediaDevices.getUserMedia(
-        buildAudioInputConstraints(selectedInputId, channelMode),
-      );
+      const stream =
+        source === 'system'
+          ? await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
+          : await navigator.mediaDevices.getUserMedia(
+              buildAudioInputConstraints(selectedInputId, channelMode),
+            );
       if (generation !== lifecycle.current) {
         stream.getTracks().forEach((track) => track.stop());
         return;
       }
       streamRef.current = stream;
+      const audioTracks = source === 'system' ? stream.getAudioTracks() : [];
+      if (source === 'system' && !audioTracks.length) {
+        releaseStream();
+        toast.error(tr('clone.system_audio_unavailable'));
+        return;
+      }
       // Labels are only populated once a stream has been granted.
-      void refreshInputs();
+      if (source === 'microphone') void refreshInputs();
       stopLevelMonitor();
       try {
         stopLevelRef.current = startInputLevelMonitor(stream, publishLevel);
@@ -201,7 +211,10 @@ export function useRecording(
 
       const chunks: Blob[] = [];
       let format = { mimeType: 'audio/webm', extension: 'webm' };
-      const started = startSupportedMediaRecorder(stream, {
+      // Record only sound: getDisplayMedia requires a display/video track but
+      // feeding it into MediaRecorder would create video instead of voice input.
+      const recordingStream = source === 'system' ? new MediaStream(audioTracks) : stream;
+      const started = startSupportedMediaRecorder(recordingStream, {
         onData: (chunk) => {
           if (chunk.type)
             format = { mimeType: chunk.type, extension: extensionForMime(chunk.type) };
@@ -220,6 +233,19 @@ export function useRecording(
       }
       format = { mimeType: started.mimeType, extension: started.extension };
       recorderRef.current = started.recorder;
+      if (source === 'system') {
+        // Stopping display sharing externally must finish and release the clip.
+        stream.getVideoTracks().forEach((track) => {
+          track.addEventListener(
+            'ended',
+            () => {
+              if (generation === lifecycle.current && recorderRef.current === started.recorder)
+                stopRecorderOnDisplayEnd(started.recorder);
+            },
+            { once: true },
+          );
+        });
+      }
       setSeconds(0);
       setIsRecording(true);
       const startedAt = Date.now();
@@ -230,14 +256,19 @@ export function useRecording(
       if (generation !== lifecycle.current) return;
       stopLevelMonitor();
       releaseStream();
-      const { key, params } = describeMicError(err);
-      toast.error(tr(key, params), { duration: 6000 });
+      if (source === 'system')
+        toast.error(tr('clone.system_audio_unavailable'), { duration: 6000 });
+      else {
+        const { key, params } = describeMicError(err);
+        toast.error(tr(key, params), { duration: 6000 });
+      }
     } finally {
       startingRef.current = false;
       if (generation === lifecycle.current) setIsStarting(false);
     }
   }, [
     selectedInputId,
+    source,
     channelMode,
     refreshInputs,
     stopLevelMonitor,
@@ -273,4 +304,8 @@ export function useRecording(
     start,
     stop,
   };
+}
+
+function stopRecorderOnDisplayEnd(recorder: MediaRecorder): void {
+  if (recorder.state !== 'inactive') recorder.stop();
 }

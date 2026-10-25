@@ -461,6 +461,10 @@
     "working": "Verwerken…"
   },
   "clone": {
+    "system_audio_title": "Pc-audio opnemen",
+    "system_audio_hint": "Speel video of audio af en druk op Opnemen en Stoppen. Systeemaudio op Windows.",
+    "record_system_audio": "Pc-audio opnemen",
+    "system_audio_unavailable": "Pc-audio opnemen niet beschikbaar. Controleer Windows en schermdeling.",
     "text_label": "Tekst",
     "paste": "Plakken",
     "paste_failed": "Toegang tot het klembord is geblokkeerd. Plak rechtstreeks in het tekstveld met het toetsenbord.",

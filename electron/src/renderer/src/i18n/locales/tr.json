@@ -461,6 +461,10 @@
     "working": "İşleniyor…"
   },
   "clone": {
+    "system_audio_title": "PC sesini kaydet",
+    "system_audio_hint": "Video veya ses oynatın, ardından Kaydet ve Durdur düğmelerine basın. Windows sistem sesi.",
+    "record_system_audio": "PC sesini kaydet",
+    "system_audio_unavailable": "PC sesi yakalanamıyor. Windows ve ekran paylaşımı izinlerini kontrol edin.",
     "text_label": "Metin",
     "paste": "Yapıştır",
     "paste_failed": "Pano erişimi engellendi. Klavyeyi kullanarak doğrudan metin alanına yapıştırın.",

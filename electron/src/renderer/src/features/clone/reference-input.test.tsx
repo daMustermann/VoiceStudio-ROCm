@@ -71,6 +71,7 @@ it('shows the drop zone and the record button together, with no mode toggle', ()
   const view = render(<ReferenceSourcePicker />);
   expect(view.getByText('clone.drop_audio')).toBeTruthy();
   expect(view.getByRole('button', { name: 'clone.record' })).toBeTruthy();
+  expect(view.getByRole('button', { name: 'clone.record_system_audio' })).toBeTruthy();
   expect(view.queryByRole('tablist')).toBeNull();
 });
 

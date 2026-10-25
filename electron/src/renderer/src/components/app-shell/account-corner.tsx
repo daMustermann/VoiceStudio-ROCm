@@ -1,7 +1,6 @@
 import { useLayoutEffect, useRef } from 'react';
 import { isMac } from '@/components/bridge';
 import { cn } from '@/lib/utils';
-import { AccountMenu } from './account-menu';
 import { SystemNotifications } from './system-notifications';
 
 const SPACE_VAR = '--corner-space';
@@ -9,8 +8,7 @@ const SPACE_VAR = '--corner-space';
 const CORNER_GAP = 12;
 
 /**
- * The window's top-right corner, on every page: the account control (photo and
- * name, or Sign in) with the notifications bell to its right.
+ * The window's top-right notifications control.
  *
  * Windows/Linux draw their window buttons over the right 148px (titleBarOverlay),
  * so the corner sits just left of them; on macOS it sits at the edge. While it
@@ -49,7 +47,6 @@ export function AccountCorner({ notificationsEnabled }: { notificationsEnabled: 
         isMac() ? 'right-3.5' : 'right-[148px]',
       )}
     >
-      <AccountMenu />
       <SystemNotifications enabled={notificationsEnabled} titlebar />
     </div>
   );

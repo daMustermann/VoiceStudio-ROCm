@@ -463,6 +463,10 @@
     "working": "Procesando…"
   },
   "clone": {
+    "system_audio_title": "Grabar audio del PC",
+    "system_audio_hint": "Reproduce un vídeo o audio, pulsa Grabar y luego Detener. Audio del sistema en Windows.",
+    "record_system_audio": "Grabar audio del PC",
+    "system_audio_unavailable": "No se puede capturar el audio del PC. Comprueba Windows y los permisos de pantalla.",
     "text_label": "Texto",
     "paste": "Pegar",
     "paste_failed": "Se bloqueó el acceso al portapapeles. Pega directamente en el campo de texto con el teclado.",

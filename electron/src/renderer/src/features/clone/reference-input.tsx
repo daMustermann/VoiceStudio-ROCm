@@ -1,4 +1,11 @@
-import { LoaderCircleIcon, MicIcon, SparklesIcon, SquareIcon, UploadCloudIcon } from 'lucide-react';
+import {
+  LoaderCircleIcon,
+  MicIcon,
+  MonitorSpeakerIcon,
+  SparklesIcon,
+  SquareIcon,
+  UploadCloudIcon,
+} from 'lucide-react';
 import { useEffect, useId, useRef, useState, type DragEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -230,8 +237,70 @@ export function RecordZone({
   );
 }
 
+/** Capture the computer's playback as an audio-only voice reference. */
+export function SystemAudioZone({
+  onAccept,
+  pickToken,
+}: { onAccept?: AcceptReference; pickToken?: PickToken } = {}) {
+  const { t } = useTranslation();
+  const ingestFile = useIngest(onAccept, pickToken);
+  const rec = useRecording((file) => void ingestFile(file), true, 'system');
+  return (
+    <div className="flex min-h-36 flex-col items-center justify-center gap-3 rounded-lg bg-muted/30 p-4 text-center">
+      {rec.isStarting || rec.isCleaning ? (
+        <div role="status" className="flex items-center gap-2 text-sm text-muted-foreground">
+          <LoaderCircleIcon className="size-5 animate-spin motion-reduce:animate-none" />
+          {t(rec.isStarting ? 'clone.starting_recording' : 'clone.cleaning')}
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => (rec.isRecording ? rec.stop() : void rec.start())}
+          aria-label={t(rec.isRecording ? 'clone.stop_recording' : 'clone.record_system_audio')}
+          className={cn(
+            'flex size-20 flex-col items-center justify-center gap-1 rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
+            rec.isRecording
+              ? 'border-2 border-destructive bg-destructive/10 text-destructive'
+              : 'bg-muted text-muted-foreground hover:bg-destructive/10',
+          )}
+        >
+          {rec.isRecording ? (
+            <SquareIcon className="size-5 fill-current" />
+          ) : (
+            <MonitorSpeakerIcon className="size-5" />
+          )}
+          <span className="text-xs font-medium">
+            {rec.isRecording
+              ? t('clone.duration_seconds', { seconds: rec.seconds })
+              : t('clone.record')}
+          </span>
+        </button>
+      )}
+      <div className="space-y-1">
+        <p className="text-sm font-medium">{t('clone.system_audio_title')}</p>
+        <p className="text-xs text-muted-foreground">{t('clone.system_audio_hint')}</p>
+      </div>
+      {rec.isRecording && (
+        <div
+          role="meter"
+          aria-label={t('recording.input_level')}
+          aria-valuemin={0}
+          aria-valuemax={1}
+          aria-valuenow={Number(rec.level.toFixed(3))}
+          className="h-1.5 w-full overflow-hidden rounded-full bg-muted"
+        >
+          <div
+            className="h-full bg-success"
+            style={{ width: `${Math.round(Math.min(1, rec.level) * 100)}%` }}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
 /**
- * Upload and record side by side: both ways in are visible at once instead of
+ * Upload, microphone and system audio side by side: all sources are visible instead of
  * hidden behind a toggle. Stacks on narrow containers.
  */
 export function ReferenceSourcePicker({ onAccept }: { onAccept?: AcceptReference } = {}) {
@@ -246,9 +315,10 @@ export function ReferenceSourcePicker({ onAccept }: { onAccept?: AcceptReference
   }, []);
   return (
     <div className="@container">
-      <div className="grid gap-3 @md:grid-cols-2 [&>*]:min-w-0">
+      <div className="grid gap-3 @md:grid-cols-3 [&>*]:min-w-0">
         <UploadZone onAccept={onAccept} pickToken={pickToken} />
         <RecordZone onAccept={onAccept} pickToken={pickToken} />
+        <SystemAudioZone onAccept={onAccept} pickToken={pickToken} />
       </div>
     </div>
   );

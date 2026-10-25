@@ -461,6 +461,10 @@
     "working": "Bearbetar…"
   },
   "clone": {
+    "system_audio_title": "Spela in datorljud",
+    "system_audio_hint": "Spela upp video eller ljud och tryck på Spela in och Stoppa. Systemljud på Windows.",
+    "record_system_audio": "Spela in datorljud",
+    "system_audio_unavailable": "Kan inte spela in datorljud. Kontrollera Windows och skärmdelning.",
     "text_label": "Text",
     "paste": "Klistra in",
     "paste_failed": "Åtkomst till urklipp blockerades. Klistra in direkt i textfältet med tangentbordet.",

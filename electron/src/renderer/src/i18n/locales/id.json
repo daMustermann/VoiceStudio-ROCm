@@ -461,6 +461,10 @@
     "working": "Memproses…"
   },
   "clone": {
+    "system_audio_title": "Rekam audio PC",
+    "system_audio_hint": "Putar video atau audio, lalu tekan Rekam dan Berhenti. Audio sistem di Windows.",
+    "record_system_audio": "Rekam audio PC",
+    "system_audio_unavailable": "Tidak dapat merekam audio PC. Periksa Windows dan izin berbagi layar.",
     "text_label": "Teks",
     "paste": "Tempel",
     "paste_failed": "Akses papan klip diblokir. Tempel langsung ke kolom teks menggunakan papan ketik.",

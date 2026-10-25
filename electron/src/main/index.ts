@@ -6,7 +6,17 @@ import { isTrustedRenderer } from './trusted-renderer';
 import { dirname, join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
-import { app, BrowserWindow, ipcMain, Menu, nativeImage, session, shell, Tray } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  desktopCapturer,
+  ipcMain,
+  Menu,
+  nativeImage,
+  session,
+  shell,
+  Tray,
+} from 'electron';
 import { electronApp, is, optimizer } from '@electron-toolkit/utils';
 import { BackendSupervisor, backendRoot } from './backend';
 import { registerIpc, wireWindowMaximizeEvents } from './ipc';
@@ -23,7 +33,6 @@ import {
   observeMainProcessTask,
 } from './main-error-journal';
 import { activateLiveWindow, isLiveWindow } from './window-safety';
-import { startAccount } from './account';
 import { installAppIdentity, installMacApplicationMenu } from './app-identity';
 import { APP_ID, PRODUCT_NAME } from '../../../config/app-config.mjs';
 
@@ -60,7 +69,6 @@ let closeCapture: (() => void) | null = null;
 let closeDevProxy: (() => Promise<void>) | null = null;
 let closeUpdates: (() => void) | null = null;
 let closeRepairAgents: (() => void) | null = null;
-let closeAccount: (() => void) | null = null;
 let quitPreparation: Promise<void> | null = null;
 
 const PERSISTENCE_FLUSH_REQUEST = 'app:flush-persistence';
@@ -101,8 +109,6 @@ async function tearDownNativeResources(): Promise<void> {
   closeUpdates = null;
   closeRepairAgents?.();
   closeRepairAgents = null;
-  closeAccount?.();
-  closeAccount = null;
   tray?.destroy();
   tray = null;
   const proxyTeardown = closeDevProxy?.() ?? Promise.resolve();
@@ -129,7 +135,10 @@ function brandIconPath(file: string): string {
     : join(backendRoot(), 'electron', 'build', 'icons', file);
 }
 
-ipcMain.handle('app:is-fullscreen', (event) => BrowserWindow.fromWebContents(event.sender)?.isFullScreen() ?? false);
+ipcMain.handle(
+  'app:is-fullscreen',
+  (event) => BrowserWindow.fromWebContents(event.sender)?.isFullScreen() ?? false,
+);
 
 function createWindow(): BrowserWindow {
   const appUrl =
@@ -247,6 +256,27 @@ if (process.env.VOICESTUDIO_ALLOW_MULTIPLE_INSTANCES !== '1' && !app.requestSing
       electronApp.setAppUserModelId(APP_ID);
       if (process.platform === 'darwin') installMacApplicationMenu(app, Menu, __APP_VERSION__);
       installRendererPermissions(session.defaultSession, process.env.ELECTRON_RENDERER_URL);
+      if (process.platform === 'win32') {
+        session.defaultSession.setDisplayMediaRequestHandler(async (request, callback) => {
+          // Windows loopback captures speaker output for an explicit Record PC audio click.
+          if (
+            !request.userGesture ||
+            !request.frame ||
+            request.frame.parent !== null ||
+            !isTrustedRenderer(request.frame.url, process.env.ELECTRON_RENDERER_URL) ||
+            !request.videoRequested ||
+            !request.audioRequested
+          )
+            return;
+          try {
+            const sources = await desktopCapturer.getSources({ types: ['screen'] });
+            if (sources[0] && !request.frame.isDestroyed())
+              callback({ video: sources[0], audio: 'loopback' });
+          } catch (error) {
+            console.warn('[capture] system audio unavailable:', error);
+          }
+        });
+      }
       app.on('browser-window-created', (_event, window) => optimizer.watchWindowShortcuts(window));
 
       const backend = new BackendSupervisor();
@@ -270,19 +300,6 @@ if (process.env.VOICESTUDIO_ALLOW_MULTIPLE_INSTANCES !== '1' && !app.requestSing
           app.exit(0);
         },
       );
-      // Before backend.start(): the backend inherits the token-bridge env.
-      closeAccount = await startAccount({
-        getMainWindow: () => mainWindow,
-        isRemoteBackend: () => backend.connection.remote,
-        notifyBackend: async (path) => {
-          if (backend.connection.remote) return;
-          await fetch(`${backend.baseUrl}${path}`, {
-            method: 'POST',
-            headers: backend.requestHeaders(),
-            signal: AbortSignal.timeout(5000),
-          });
-        },
-      });
       closeRepairAgents = await registerRepairAgents(
         backend,
         backendRoot(),

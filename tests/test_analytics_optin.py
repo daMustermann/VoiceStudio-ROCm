@@ -72,14 +72,13 @@ def test_off_by_default_even_when_the_build_ships_a_token(monkeypatch):
     assert analytics.enabled() is False
 
 
-def test_source_builds_have_a_destination_via_the_in_repo_default(monkeypatch):
-    """#1193: with no env/baked token, the committed publishable key is the
-    fallback — so source builds get the SAME consent flow as installers. Consent
-    is still the gate: available ≠ enabled."""
+def test_rocm_fork_never_enables_telemetry_even_with_previous_consent(monkeypatch):
+    """An old saved opt-in may not reactivate telemetry in this fork."""
     assert analytics.token_configured() is True  # no env token set by _isolate
-    assert analytics.enabled() is False          # …but silence is still not consent
+    assert analytics.enabled() is False
     analytics.set_opted_in(True)
-    assert analytics.enabled() is True
+    assert analytics.enabled() is False
+    assert analytics._get_client() is None
 
 
 def test_the_env_token_beats_the_in_repo_default(monkeypatch):
@@ -101,10 +100,10 @@ def test_opting_in_without_any_token_still_cannot_transmit(monkeypatch):
     assert analytics.enabled() is False
 
 
-def test_enabled_only_when_BOTH_gates_are_true(monkeypatch):
+def test_telemetry_stays_disabled_even_with_valid_token_and_opt_in(monkeypatch):
     monkeypatch.setenv("POSTHOG_PROJECT_TOKEN", "phc_test")
     analytics.set_opted_in(True)
-    assert analytics.enabled() is True
+    assert analytics.enabled() is False
 
 
 def test_kill_switch_outranks_everything(monkeypatch):
@@ -117,7 +116,7 @@ def test_kill_switch_outranks_everything(monkeypatch):
 def test_withdrawing_consent_takes_effect_immediately(monkeypatch):
     monkeypatch.setenv("POSTHOG_PROJECT_TOKEN", "phc_test")
     analytics.set_opted_in(True)
-    assert analytics.enabled() is True
+    assert analytics.enabled() is False
     analytics.set_opted_in(False)
     assert analytics.enabled() is False
     # capture() after opting out must be a no-op, not a queued event.
@@ -248,10 +247,8 @@ def test_frontend_allowlist_mirrors_backend():
 # ── Rule 2: no exception autocapture ────────────────────────────────────────
 
 
-def test_client_is_built_with_exception_autocapture_OFF(monkeypatch):
-    """The SDK's own default ships raw tracebacks — home paths, and in this
-    codebase HF tokens out of exception messages — bypassing the redaction in
-    core.failure.sanitize(). It must be explicitly disabled."""
+def test_analytics_client_is_never_created(monkeypatch):
+    """Even an explicit opt-in must never initialize the analytics SDK."""
     captured_kwargs = {}
 
     class FakePosthog:
@@ -269,15 +266,13 @@ def test_client_is_built_with_exception_autocapture_OFF(monkeypatch):
 
     fake_mod = types.ModuleType("posthog")
     fake_mod.Posthog = FakePosthog
-    # Installed BEFORE opting in: set_opted_in(True) builds the client eagerly
-    # (one-shot install ping), and that construction is what's under test.
     monkeypatch.setitem(sys.modules, "posthog", fake_mod)
 
     monkeypatch.setenv("POSTHOG_PROJECT_TOKEN", "phc_test")
     analytics.set_opted_in(True)
     analytics.capture("speech_generated", {"engine_id": "omnivoice"})
 
-    assert captured_kwargs.get("enable_exception_autocapture") is False
+    assert captured_kwargs == {}
 
 
 def test_capture_never_raises_even_if_the_sdk_explodes(monkeypatch):

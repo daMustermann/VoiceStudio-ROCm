@@ -166,8 +166,8 @@ def token_configured() -> bool:
 
 
 def enabled() -> bool:
-    """The single source of truth: BOTH gates true, and not kill-switched."""
-    return (not _kill_switched()) and token_configured() and user_opted_in()
+    """Telemetry is permanently disabled in the ROCm fork."""
+    return False
 
 
 def _get_client():

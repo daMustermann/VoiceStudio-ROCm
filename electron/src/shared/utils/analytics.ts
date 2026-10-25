@@ -48,7 +48,7 @@ const POSTHOG_HOST: string =
 
 /** Whether this build has an analytics destination at all. */
 export function analyticsAvailable(): boolean {
-  return Boolean(POSTHOG_TOKEN);
+  return false;
 }
 
 /** The ONLY property keys allowed to leave. Mirrors backend `_ALLOWED_PROPS`.
@@ -135,7 +135,7 @@ export function sanitizeOutgoingEvent<T extends OutgoingAnalyticsEvent>(
 
 let client: AnalyticsClient | null = null;
 let consentGeneration = 0;
-let captureState: 'unresolved' | 'enabled' | 'disabled' = 'unresolved';
+let captureState: 'unresolved' | 'enabled' | 'disabled' = 'disabled';
 
 export const ANALYTICS_EXCEPTION_STAGES = [
   'renderer:uncaught',
@@ -238,6 +238,8 @@ export function hardenedConfig() {
 
 /** Start analytics. Call ONLY when the user has opted in. Idempotent. */
 export async function enableAnalytics(): Promise<void> {
+  // This ROCm build never initializes PostHog, even if consent was saved previously.
+  if (!analyticsAvailable()) return;
   const generation = ++consentGeneration;
   try {
     if (!POSTHOG_TOKEN) return; // no destination in this build — nothing to start

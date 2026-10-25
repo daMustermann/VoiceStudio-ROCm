@@ -461,6 +461,10 @@
     "working": "처리 중…"
   },
   "clone": {
+    "system_audio_title": "PC 오디오 녹음",
+    "system_audio_hint": "동영상이나 오디오를 재생한 뒤 녹음 및 중지를 누르세요. Windows 시스템 오디오 지원.",
+    "record_system_audio": "PC 오디오 녹음",
+    "system_audio_unavailable": "PC 오디오를 캡처할 수 없습니다. Windows 화면 공유와 오디오를 확인하세요.",
     "text_label": "텍스트",
     "paste": "붙여넣기",
     "paste_failed": "클립보드 접근이 차단되었습니다. 키보드로 텍스트 입력란에 직접 붙여넣으세요.",

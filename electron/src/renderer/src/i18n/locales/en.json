@@ -379,6 +379,10 @@
     "argosRuntimeUnavailable": "Argos runtime unavailable. Reinstall the backend or select NLLB."
   },
   "clone": {
+    "system_audio_title": "Record PC audio",
+    "system_audio_hint": "Play a video or audio, then press Record and Stop. System audio on Windows.",
+    "record_system_audio": "Record PC audio",
+    "system_audio_unavailable": "PC audio capture unavailable. Check Windows screen sharing and audio playback.",
     "title": "Voice cloning",
     "text_label": "Script",
     "paste": "Paste",

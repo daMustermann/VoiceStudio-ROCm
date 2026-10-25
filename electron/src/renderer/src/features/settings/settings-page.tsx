@@ -3,8 +3,6 @@ import { UpdateSettings } from './update-settings';
 import { MirrorSettings } from './mirror-settings';
 import { StorageSettings } from './storage-settings';
 import { PrivacySettings } from './privacy-settings';
-import { AccountSettings } from './account-settings';
-import { useAccount } from '@/features/account/use-account';
 import { PerformanceSettings } from './performance-settings';
 import { CredentialSettings } from './credential-settings';
 import { NetworkSettings } from './network-settings';
@@ -28,7 +26,6 @@ import {
   Share2Icon,
   CpuIcon,
   ShieldCheckIcon,
-  UserRoundIcon,
   HardDriveIcon,
   KeyRoundIcon,
   FileTextIcon,
@@ -155,14 +152,6 @@ const extraSettings = [
     ],
   },
   {
-    to: '/settings/account',
-    label: 'account.title',
-    Icon: UserRoundIcon,
-    Component: AccountSettings,
-    fields: ['account.title', 'account.features', 'account.sync', 'account.sign_in'],
-    cloudAccountsOnly: true,
-  },
-  {
     to: '/settings/performance',
     label: 'settings.compute_device_title',
     Icon: CpuIcon,
@@ -190,12 +179,7 @@ const extraSettings = [
     label: 'settings.privacy',
     Icon: ShieldCheckIcon,
     Component: PrivacySettings,
-    fields: [
-      'settings.privacy',
-      'privacy.analytics_title',
-      'privacy.watermark_title',
-      'settings.history_retention',
-    ],
+    fields: ['settings.privacy', 'privacy.watermark_title', 'settings.history_retention'],
   },
   {
     to: '/settings/permissions',
@@ -232,9 +216,8 @@ const extraSettings = [
   },
 ] as const;
 
-/** Settings → Account is listed only when this build offers VoiceStudio Cloud accounts. */
-export function extraSettingsFor(cloudAccountsAvailable: boolean) {
-  return extraSettings.filter((item) => cloudAccountsAvailable || !('cloudAccountsOnly' in item));
+export function extraSettingsFor() {
+  return extraSettings;
 }
 
 export function SettingsPage() {
@@ -242,7 +225,7 @@ export function SettingsPage() {
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   });
-  const extras = extraSettingsFor(useAccount().state?.available === true);
+  const extras = extraSettingsFor();
   const extra = extras.find((item) => pathname === item.to);
   const isOpenApi = pathname === '/settings/openapi';
   const isModels = pathname.includes('/models');

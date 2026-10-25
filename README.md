@@ -157,7 +157,7 @@ Or download from [Releases](https://github.com/debpalash/VoiceStudio/releases/la
 | Windows on ARM (Snapdragon X etc.) | **Experimental**, validation pending: native ARM64 app, x64 Python backend under emulation, CPU only |
 | Intel Mac | App UI only; connect to a remote backend ([why](docs/install/macos.md)) |
 
-Open **Voice cloning**, choose a voice or add a clean reference recording, enter your text, and generate. Install the required model when prompted. Hardware needs vary by engine; see [performance](docs/performance.md).
+Open **Voice cloning**, choose a voice or add a clean reference recording, enter your text, and generate. References can be uploaded, recorded from a microphone, or recorded directly from PC playback (Windows: click **Record PC audio** while a video or sound is playing, then click **Stop**). PC playback recording uses Electron's Windows system loopback; other desktop systems may require uploading an audio file. This ROCm fork excludes GitHub star counts, usage telemetry, and VoiceStudio Cloud accounts. Install the required model when prompted. Hardware needs vary by engine; see [performance](docs/performance.md).
 
 ### Install upstream with a prompt
 

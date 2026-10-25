@@ -3,7 +3,6 @@ import { GemIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import './support-shortcut.css';
-import { GithubStar } from './github-star';
 
 export function SupportShortcut() {
   const { t } = useTranslation();
@@ -28,7 +27,6 @@ export function SupportShortcut() {
           {t('supportPlans.get_pro')}
         </TooltipContent>
       </Tooltip>
-      <GithubStar />
     </div>
   );
 }

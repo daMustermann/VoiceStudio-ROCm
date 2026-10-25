@@ -461,6 +461,10 @@
     "working": "處理中…"
   },
   "clone": {
+    "system_audio_title": "錄製電腦音訊",
+    "system_audio_hint": "播放影片或音訊，再按錄製與停止。Windows 支援系統音訊。",
+    "record_system_audio": "錄製電腦音訊",
+    "system_audio_unavailable": "無法錄製電腦音訊。請檢查 Windows 螢幕分享與音訊播放。",
     "text_label": "文字",
     "paste": "貼上",
     "paste_failed": "剪貼簿存取遭到封鎖。請使用鍵盤直接貼上到文字欄位。",

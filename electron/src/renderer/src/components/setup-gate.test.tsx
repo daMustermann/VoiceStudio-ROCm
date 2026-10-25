@@ -103,9 +103,8 @@ it('requires passing preflight and installed models before completion', async ()
     expect(screen.getByRole('button', { name: 'setup.continue_ok' })).toBeEnabled(),
   );
   fireEvent.click(screen.getByRole('button', { name: 'setup.continue_ok' }));
-  await screen.findByRole('button', { name: 'Choose privacy' });
+  await screen.findByText('Privacy');
   expect(screen.getByText('Privacy')).toBeVisible();
-  fireEvent.click(screen.getByRole('button', { name: 'Choose privacy' }));
   await waitFor(() =>
     expect(screen.getByRole('button', { name: 'setup.continue_ok' })).toBeEnabled(),
   );
@@ -153,7 +152,7 @@ it('requires passing preflight and installed models before completion', async ()
   window.removeEventListener('voicestudio:first-sound', handoff);
 });
 
-it('the privacy step also waits for the account choice when accounts are offered', async () => {
+it('the privacy step proceeds without cloud account or telemetry prompts', async () => {
   mock.accountRequired = true;
   const client = mount();
   client.setQueryData(['setup-preflight'], { ok: true, checks: [] });
@@ -163,9 +162,9 @@ it('the privacy step also waits for the account choice when accounts are offered
     expect(screen.getByRole('button', { name: 'setup.continue_ok' })).toBeEnabled(),
   );
   fireEvent.click(screen.getByRole('button', { name: 'setup.continue_ok' }));
-  fireEvent.click(await screen.findByRole('button', { name: 'Choose privacy' }));
-  expect(screen.getByRole('button', { name: 'setup.continue_ok' })).toBeDisabled();
-  fireEvent.click(screen.getByRole('button', { name: 'Choose account' }));
+  await screen.findByText('Privacy');
+  expect(screen.queryByRole('button', { name: 'Choose privacy' })).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Choose account' })).toBeNull();
   await waitFor(() =>
     expect(screen.getByRole('button', { name: 'setup.continue_ok' })).toBeEnabled(),
   );

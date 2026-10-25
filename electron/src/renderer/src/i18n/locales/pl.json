@@ -465,6 +465,10 @@
     "working": "Przetwarzanie…"
   },
   "clone": {
+    "system_audio_title": "Nagraj dźwięk komputera",
+    "system_audio_hint": "Odtwórz wideo lub dźwięk, a potem naciśnij Nagraj i Zatrzymaj. Dźwięk systemowy w Windows.",
+    "record_system_audio": "Nagraj dźwięk komputera",
+    "system_audio_unavailable": "Nie można nagrać dźwięku komputera. Sprawdź Windows i udostępnianie ekranu.",
     "text_label": "Tekst",
     "paste": "Wklej",
     "paste_failed": "Dostęp do schowka został zablokowany. Wklej bezpośrednio do pola tekstowego za pomocą klawiatury.",

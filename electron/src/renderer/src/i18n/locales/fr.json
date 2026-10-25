@@ -463,6 +463,10 @@
     "working": "Traitement en cours…"
   },
   "clone": {
+    "system_audio_title": "Enregistrer le son du PC",
+    "system_audio_hint": "Lisez une vidéo ou un son, puis lancez et arrêtez l’enregistrement. Audio système sur Windows.",
+    "record_system_audio": "Enregistrer le son du PC",
+    "system_audio_unavailable": "Capture audio du PC indisponible. Vérifiez Windows et le partage d’écran.",
     "text_label": "Texte",
     "paste": "Coller",
     "paste_failed": "L’accès au presse-papiers est bloqué. Collez directement dans le champ de texte avec le clavier.",

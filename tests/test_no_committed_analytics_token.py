@@ -113,14 +113,9 @@ def test_release_workflow_still_passes_the_secret_to_the_build():
     assert "secrets.POSTHOG_PROJECT_TOKEN" in wf, "the override must come from the repo secret"
 
 
-def test_the_shell_hands_the_token_to_the_backend_it_spawns():
-    """Without this a baked release token could never beat the in-repo default."""
+def test_rocm_shell_never_passes_an_analytics_destination_to_backend():
+    """An inherited or build-time token must not reach this fork's backend."""
     src = (_REPO / "electron/src/main/backend.ts").read_text(encoding="utf-8")
-    assert "__POSTHOG_PROJECT_TOKEN__" in src, "the shell no longer bakes in the token"
-    assert "POSTHOG_PROJECT_TOKEN" in src, "the backend process is no longer given the override"
-    # #1193: the shell marks everything it spawns as the "installer" channel.
-
-    # option_env! is resolved at COMPILE time, so cargo must rebuild when the
-    # secret changes — otherwise a cached build keeps the token it first saw.
-    config = (_REPO / "electron/electron.vite.config.ts").read_text(encoding="utf-8")
-    assert "VITE_POSTHOG_KEY" in config
+    assert "delete env.POSTHOG_PROJECT_TOKEN" in src
+    assert "delete env.POSTHOG_HOST" in src
+    assert "env.OMNIVOICE_ANALYTICS_DISABLED = '1'" in src

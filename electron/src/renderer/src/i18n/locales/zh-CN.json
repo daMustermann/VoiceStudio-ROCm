@@ -475,6 +475,10 @@
     "working": "处理中…"
   },
   "clone": {
+    "system_audio_title": "录制电脑音频",
+    "system_audio_hint": "播放视频或音频，然后点击录制和停止。Windows 支持系统音频。",
+    "record_system_audio": "录制电脑音频",
+    "system_audio_unavailable": "无法录制电脑音频。请检查 Windows 屏幕共享和音频播放。",
     "text_label": "文本",
     "paste": "粘贴",
     "paste_failed": "剪贴板访问被阻止。请使用键盘直接粘贴到文本框中。",

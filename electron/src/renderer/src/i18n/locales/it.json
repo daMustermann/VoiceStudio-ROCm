@@ -463,6 +463,10 @@
     "working": "Elaborazione…"
   },
   "clone": {
+    "system_audio_title": "Registra audio del PC",
+    "system_audio_hint": "Riproduci un video o audio, poi avvia e ferma la registrazione. Audio di sistema su Windows.",
+    "record_system_audio": "Registra audio del PC",
+    "system_audio_unavailable": "Acquisizione audio del PC non disponibile. Controlla Windows e la condivisione schermo.",
     "text_label": "Testo",
     "paste": "Incolla",
     "paste_failed": "L’accesso agli appunti è bloccato. Incolla direttamente nel campo di testo con la tastiera.",

@@ -461,6 +461,10 @@
     "working": "Wird verarbeitet…"
   },
   "clone": {
+    "system_audio_title": "PC-Audio aufnehmen",
+    "system_audio_hint": "Video oder Audio abspielen, Aufnahme starten und stoppen. Systemton über Windows.",
+    "record_system_audio": "PC-Audio aufnehmen",
+    "system_audio_unavailable": "PC-Audio konnte nicht aufgenommen werden. Prüfe die Bildschirmfreigabe und Windows-Audiowiedergabe.",
     "text_label": "Text",
     "paste": "Einfügen",
     "paste_failed": "Der Zugriff auf die Zwischenablage wurde blockiert. Füge den Inhalt mit der Tastatur direkt ins Textfeld ein.",

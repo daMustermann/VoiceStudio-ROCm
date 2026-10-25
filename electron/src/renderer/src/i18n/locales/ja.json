@@ -461,6 +461,10 @@
     "working": "処理中…"
   },
   "clone": {
+    "system_audio_title": "PC音声を録音",
+    "system_audio_hint": "動画や音声を再生し、録音して停止します。Windowsでシステム音声に対応。",
+    "record_system_audio": "PC音声を録音",
+    "system_audio_unavailable": "PC音声を取得できません。Windowsの画面共有と音声再生を確認してください。",
     "text_label": "テキスト",
     "paste": "貼り付け",
     "paste_failed": "クリップボードへのアクセスが拒否されました。キーボードでテキスト欄に直接貼り付けてください。",
