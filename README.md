@@ -1,30 +1,77 @@
 <div align="center">
   <img src="docs/logo.png" alt="VoiceStudio" width="88" />
-  <h1>VoiceStudio</h1>
+  <h1>VoiceStudio ROCm</h1>
+  <p><strong>AMD GPU fork of VoiceStudio, focused on native Windows ROCm support.</strong></p>
+  <p>RX 7900 XTX (gfx1100) · PyTorch 2.14.0 + ROCm 10.1 · Electron desktop</p>
   <p>
-    <a href="https://trendshift.io/repositories/28176?utm_source=repository-badge&amp;utm_medium=badge&amp;utm_campaign=badge-repository-28176" target="_blank" rel="noopener noreferrer"><img src="https://trendshift.io/api/badge/repositories/28176" alt="VoiceStudio ranking on Trendshift" width="220" height="48" /></a>
-  </p>
-  <p><strong>Open-source voice cloning, voice design, video dubbing, dictation, transcription & audiobook creation in 646 languages.</strong></p>
-  <p>
-    <a href="https://voicestudio.sh/?utm_source=github&utm_medium=readme&utm_campaign=project">Website</a> ·
-    <a href="https://github.com/debpalash/VoiceStudio/releases/latest">Download</a> ·
-    <a href="#get-started">Get started</a> ·
-    <a href="#documentation">Docs</a> ·
-    <a href="https://discord.gg/bzQavDfVV9">Discord</a> ·
-    <a href="docs/readme/README_CN.md">简体中文</a> ·
-    <a href="docs/readme/README_JA.md">日本語</a>
+    <a href="https://github.com/daMustermann/VoiceStudio-ROCm/tree/rocm">ROCm branch</a> ·
+    <a href="#amd-rocm-on-windows">Install this fork</a> ·
+    <a href="docs/install/windows.md#gpu-support">AMD GPU guide</a> ·
+    <a href="https://github.com/debpalash/VoiceStudio">Original VoiceStudio</a>
   </p>
   <p>
-    <a href="https://github.com/debpalash/VoiceStudio/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/debpalash/VoiceStudio/ci.yml?branch=main" alt="CI" /></a>
-    <a href="https://github.com/debpalash/VoiceStudio/releases/latest"><img src="https://img.shields.io/github/v/release/debpalash/VoiceStudio" alt="Latest release" /></a>
+    <img src="https://img.shields.io/badge/Windows%20x64-AMD%20ROCm%2010.1-blue" alt="Windows AMD ROCm 10.1" />
+    <img src="https://img.shields.io/badge/PyTorch-2.14.0%2Brocm10.1.0-orange" alt="PyTorch 2.14.0 ROCm build" />
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0-blue" alt="AGPL-3.0" /></a>
-    <a href="https://supermetry.com"><img src="https://app.supermetry.com/px/zfjiv7psp4ed.svg?c=VoiceStudio&style=stats" alt="views" /></a>
   </p>
 </div>
 
+## AMD ROCm on Windows
+
+This is an **experimental community fork** of [debpalash/VoiceStudio](https://github.com/debpalash/VoiceStudio),
+with an opt-in Windows AMD PyTorch stack. The tested combination is an
+**RX 7900 XTX (gfx1100)** with **PyTorch 2.14.0+rocm10.1.0** and **ROCm 10.1**.
+Other AMD GPU architectures and individual speech engines may need more work.
+
+**Install from this fork's `rocm` branch** on Windows x64. You need Git,
+Node.js 22+, Bun, a compatible AMD driver and enough space for the Python
+environment and models. Run in PowerShell:
+
+```powershell
+git clone --branch rocm https://github.com/daMustermann/VoiceStudio-ROCm.git
+cd VoiceStudio-ROCm
+$env:OMNIVOICE_TORCH_VARIANT = 'rocm'
+bun install
+bun run setup:api
+.\.venv\Scripts\python.exe -c "import torch; print(torch.__version__, torch.version.hip, torch.cuda.is_available()); print(torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'No GPU')"
+bun run desktop
+```
+
+The ROCm wheels for this setup require **Python 3.11 x64**. ROCm uses the
+`torch.cuda` API through HIP, even on AMD hardware. To force the tested
+speech-to-text engine before starting the app, set:
+
+```powershell
+$env:OMNIVOICE_ASR_BACKEND = 'pytorch-whisper'
+$env:OMNIVOICE_PYTORCH_ASR_MODEL = 'openai/whisper-base'
+```
+
+### Acceleration status
+
+| Component | RX 7900 XTX on Windows | Notes |
+| --- | --- | --- |
+| PyTorch / ROCm device detection | **Verified** | AMD GPU recognized through HIP / `torch.cuda` |
+| PyTorch Whisper ASR | **Verified on GPU** | German speech transcribed with `openai/whisper-base` |
+| OmniVoice TTS | **Not yet validated end-to-end** | Model licenses require review and acceptance before inference |
+| OmniVoice subprocess | **Available as an isolation option** | Uses the same TTS model; GPU inference still unverified |
+| audio.cpp Vulkan runtime | **GPU detected; runtime verified** | Requires separate Breeze-TTS-2 weights; TTS generation not yet validated |
+| faster-whisper / WhisperX (CTranslate2) | **No ROCm acceleration** | CTranslate2 does not inherit PyTorch HIP support |
+
+VoiceStudio's model manager may require acceptance of licenses for
+`k2-fsa/OmniVoice` and `eustlb/higgs-audio-v2-tokenizer`; downloading models
+does not grant that acceptance. audio.cpp's Vulkan path is an alternative to
+ROCm, with its own model and license requirements. See the
+[full Windows ROCm guide](docs/install/windows.md#gpu-support).
+
+> [!IMPORTANT]
+> **The official [VoiceStudio releases](https://github.com/debpalash/VoiceStudio/releases/latest)
+> and `voicestudio.sh` installation scripts are maintained upstream.** They
+> install upstream VoiceStudio, **not this fork's `rocm` changes**. No fork-specific
+> Windows installer has been published; use the source instructions above.
+
 ![A tour of the Electron app: voice cloning, voice design, dubbing, and model management](docs/media/electron/voicestudio.gif)
 
-## Your voice. Your workflow.
+## VoiceStudio features
 
 | Create | Produce | Connect |
 | :--- | :--- | :--- |
@@ -55,9 +102,12 @@ Local workflows run on your hardware. Remote services are optional; usage analyt
 
 </details>
 
-## Get started
+## Upstream installation and other platforms
 
-### One-command install (macOS / Linux)
+The instructions in this section install **upstream VoiceStudio**. For the
+Windows AMD ROCm fork, use [the source setup above](#amd-rocm-on-windows).
+
+### Upstream one-command install (macOS / Linux)
 
 ```sh
 # Latest Electron release
@@ -73,7 +123,7 @@ curl -fsSL https://voicestudio.sh/install | sh -s -- --main
 curl -fsSL https://voicestudio.sh/install | sh -s -- --uninstall
 ```
 
-On Windows, run `irm https://voicestudio.sh/install | iex` in PowerShell.
+For **upstream** VoiceStudio on Windows, run `irm https://voicestudio.sh/install | iex` in PowerShell.
 
 If `voicestudio.sh/install` is unreachable or returns 404, run the same script
 straight from the repository, or clone it and run `scripts/install.sh`:
@@ -102,12 +152,12 @@ Or download from [Releases](https://github.com/debpalash/VoiceStudio/releases/la
 
 Open **Voice cloning**, choose a voice or add a clean reference recording, enter your text, and generate. Install the required model when prompted. Hardware needs vary by engine; see [performance](docs/performance.md).
 
-### Install with prompt
+### Install upstream with a prompt
 
 Paste into your coding agent (Claude Code, Codex, Cursor, …):
 
 ```text
-Install the VoiceStudio Electron app on this device and verify it works, following
+Install the upstream VoiceStudio Electron app on this device and verify it works, following
 https://github.com/debpalash/VoiceStudio/blob/main/docs/install/agent.md
 ```
 
@@ -116,7 +166,7 @@ data, asking before model downloads, and a test generation. Agents that support 
 can also run `npx skills add debpalash/VoiceStudio`.
 
 <details>
-<summary><strong>Run the Electron preview from source</strong></summary>
+<summary><strong>Run the upstream Electron preview from source</strong></summary>
 
 ```bash
 git clone https://github.com/debpalash/VoiceStudio.git
@@ -147,7 +197,7 @@ Add `-- --install` for the networked managed-runtime installation check.
 
 Agent skills: `npx skills add debpalash/VoiceStudio` — choose **voicestudio** for audio workflows or **voicestudio-maintainer** for repository maintenance.
 
-## Sponsors
+## Support the upstream maintainers
 
 Sponsorship funds maintainer time, development tools, release infrastructure and test hardware; it buys recognition, not features.
 
