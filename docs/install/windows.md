@@ -149,6 +149,13 @@ or engine's GPU badge does not guarantee each TTS model's kernels work. The
 `omnivoice-subprocess` option offers a process-isolated fallback with the same
 model. For a different GPU execution stack, audio.cpp uses Vulkan and does not
 depend on ROCm, but requires its own runtime and Breeze-TTS-2 model weights.
+On the RX 7900 XTX, the isolated OmniVoice child process passed a real
+start/ping/shutdown check. The audio.cpp v0.7.4 Vulkan runtime selected the AMD
+GPU with approximately 24 GB VRAM, but Breeze-TTS-2 weights were absent.
+Neither path has yet completed a TTS generation test. A separate CPU fallback,
+KittenTTS, successfully generated 5.94 seconds of English audio at 24 kHz.
+OmniVoice and Breeze-TTS-2 speech tests require explicit model-license review
+and acceptance in Model Catalogue before continuing.
 
 Other AMD paths:
 

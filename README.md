@@ -52,9 +52,10 @@ $env:OMNIVOICE_PYTORCH_ASR_MODEL = 'openai/whisper-base'
 | --- | --- | --- |
 | PyTorch / ROCm device detection | **Verified** | AMD GPU recognized through HIP / `torch.cuda` |
 | PyTorch Whisper ASR | **Verified on GPU** | German speech transcribed with `openai/whisper-base` |
-| OmniVoice TTS | **Not yet validated end-to-end** | Model licenses require review and acceptance before inference |
-| OmniVoice subprocess | **Available as an isolation option** | Uses the same TTS model; GPU inference still unverified |
-| audio.cpp Vulkan runtime | **GPU detected; runtime verified** | Requires separate Breeze-TTS-2 weights; TTS generation not yet validated |
+| OmniVoice TTS | **License-gated; inference not yet tested** | Native generation correctly rejects unaccepted OmniVoice/tokenizer terms |
+| OmniVoice subprocess | **Real subprocess ping passed; inference not yet tested** | Same TTS model, model-license review still required |
+| audio.cpp Vulkan runtime | **GPU detected; runtime verified** | RX 7900 XTX selected on Vulkan with ~24 GB VRAM; Breeze-TTS-2 weights and license acceptance still missing |
+| KittenTTS (CPU fallback) | **Real audio generated** | 5.94 s English speech at 24 kHz, non-silent WAV; CPU-only by design |
 | faster-whisper / WhisperX (CTranslate2) | **No ROCm acceleration** | CTranslate2 does not inherit PyTorch HIP support |
 
 VoiceStudio's model manager may require acceptance of licenses for
@@ -62,6 +63,10 @@ VoiceStudio's model manager may require acceptance of licenses for
 does not grant that acceptance. audio.cpp's Vulkan path is an alternative to
 ROCm, with its own model and license requirements. See the
 [full Windows ROCm guide](docs/install/windows.md#gpu-support).
+
+The live TTS smoke checks above ran on Windows with an RX 7900 XTX on
+2026-10-25. A working native-runtime probe or subprocess ping is **not** proof
+that the respective model can synthesize audio on that GPU.
 
 > [!IMPORTANT]
 > **The official [VoiceStudio releases](https://github.com/debpalash/VoiceStudio/releases/latest)
