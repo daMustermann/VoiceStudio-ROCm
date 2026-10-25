@@ -434,9 +434,8 @@ class ASRBackend(ABC):
     # TTSBackend.gpu_compat contract so engine_routing.resolve_routing() can
     # surface the effective device per host (no silent CPU fallback). The
     # conservative default is CPU-only; subclasses declare what they really run
-    # on. (ROCm is intentionally NOT claimed yet for any ASR engine — see the
-    # per-engine notes; an unverified `rocm` claim would route ROCm hosts to a
-    # broken GPU path, strictly worse than the honest `cpu_fallback`.)
+    # on. Pure PyTorch Whisper has been verified on ROCm 10.1 (Windows gfx1100);
+    # CTranslate2 engines still cannot execute on HIP.
     gpu_compat: tuple[str, ...] = ("cpu",)
 
     def execution_evidence_loaded(self) -> bool:
@@ -1433,15 +1432,15 @@ class MLXWhisperBackend(ASRBackend):
             mx.clear_cache()
 
 
-# ── PyTorch Whisper fallback (CUDA / CPU via pipeline) ─────────────────────
+# ── PyTorch Whisper fallback (CUDA / ROCm / MPS / CPU via pipeline) ────────
 
 
 class PyTorchWhisperBackend(ASRBackend):
     id = "pytorch-whisper"
-    display_name = "PyTorch Whisper (CUDA / CPU via transformers pipeline)"
-    # Pure transformers pipeline → runs wherever torch does (CUDA, MPS, CPU).
-    # ROCm-via-HIP would also work but is left unclaimed pending verification.
-    gpu_compat = ("cuda", "mps", "cpu")
+    display_name = "PyTorch Whisper (CUDA / ROCm / MPS / CPU via transformers pipeline)"
+    # Transformers uses torch.cuda on both NVIDIA and AMD HIP. Verified live
+    # German ASR on Windows ROCm 10.1 (RX 7900 XTX / gfx1100, whisper-base).
+    gpu_compat = ("cuda", "rocm", "mps", "cpu")
 
     def __init__(self, asr_pipe=None):
         # Reuses the `_asr_pipe` attached to the TTS model when available.
@@ -3945,7 +3944,8 @@ def _fw_repo(name: str) -> str | None:
 def _local_model_source(name: str) -> str:
     """What an ASR backend should hand its loader: the installed snapshot
     directory when ``name`` (repo id or faster-whisper alias) is installed,
-    otherwise ``name`` unchanged.
+    otherwise ``name`` unchanged. This includes full Hugging Face cache
+    snapshots for models not yet registered in the model catalogue.
 
     Loading by repo id asks the Hub for ``main`` first — an untimed request
     that stalls on a packet-dropping network and cannot resolve a pinned
@@ -3960,9 +3960,32 @@ def _local_model_source(name: str) -> str:
         return name
     try:
         from api.routers.setup.models import installed_snapshot_path
-        return installed_snapshot_path(repo) or name
+        installed = installed_snapshot_path(repo)
+        if installed:
+            return installed
     except Exception:  # noqa: BLE001 — never block a load on the lookup
-        return name
+        pass
+    # Custom checkpoints can have a complete HF cache snapshot without a row
+    # in the VoiceStudio catalogue. Resolving by repo id would still contact
+    # the Hub for 'main', even in offline mode. Inspect the local cache only;
+    # require config and weights so a partial download can still be recovered
+    # by the normal by-name loader.
+    try:
+        from pathlib import Path
+        from huggingface_hub import try_to_load_from_cache
+
+        config = try_to_load_from_cache(repo, "config.json")
+        if isinstance(config, str):
+            snapshot = Path(config).parent
+            if Path(config).is_file() and any(
+                file.is_file() and file.stat().st_size > 0
+                for pattern in ("*.safetensors", "*.bin")
+                for file in snapshot.glob(pattern)
+            ):
+                return str(snapshot)
+    except Exception:  # noqa: BLE001 — cache inspection is best effort
+        pass
+    return name
 
 
 def _offline_asr_repo(backend_id: str | None = None) -> str | None:

@@ -131,6 +131,25 @@ uses PyTorch's `torch.cuda` API even though it is powered by HIP/ROCm. A
 successful package installation alone does **not** establish kernel or engine
 compatibility; confirm the device check and exercise your specific models.
 
+**Verified ASR on RX 7900 XTX:** `pytorch-whisper` transcribed German speech on
+Windows ROCm 10.1 with the `openai/whisper-base` Transformers pipeline running
+on the HIP GPU (`torch.cuda`). The engine is now identified as ROCm-accelerated
+in GPU diagnostics. Auto-selection prefers it over the CTranslate2-based
+WhisperX / faster-whisper on ROCm. To explicitly select it and reproduce the
+tested model in PowerShell:
+
+```powershell
+$env:OMNIVOICE_ASR_BACKEND = 'pytorch-whisper'
+$env:OMNIVOICE_PYTORCH_ASR_MODEL = 'openai/whisper-base'
+```
+
+For synthesis, the bundled OmniVoice PyTorch engine supports the ROCm device
+path. Actual model inference must be tested separately; an installed ROCm wheel
+or engine's GPU badge does not guarantee each TTS model's kernels work. The
+`omnivoice-subprocess` option offers a process-isolated fallback with the same
+model. For a different GPU execution stack, audio.cpp uses Vulkan and does not
+depend on ROCm, but requires its own runtime and Breeze-TTS-2 model weights.
+
 Other AMD paths:
 
 - **Use an engine with its own GPU runtime.** [audio.cpp](../engines/audio-cpp.md)

@@ -176,3 +176,24 @@ def test_uninstalled_or_custom_names_keep_loading_by_name(tmp_path, monkeypatch)
     assert asr_backend._local_model_source("my-org/custom") == "my-org/custom"
     assert asr_backend._local_model_source(str(tmp_path)) == str(tmp_path)
     assert os.path.isdir(str(tmp_path))
+
+
+def test_cached_non_catalogued_whisper_loads_offline_from_snapshot(tmp_path, monkeypatch):
+    """A complete HF cache entry works offline even without a catalogue row."""
+    from services import asr_backend
+    snapshot = tmp_path / "snapshots" / "revision"
+    snapshot.mkdir(parents=True)
+    config = snapshot / "config.json"
+    config.write_text("{}")
+    (snapshot / "model.safetensors").write_bytes(b"weights")
+    monkeypatch.setattr(
+        "api.routers.setup.models.installed_snapshot_path", lambda repo: None,
+    )
+    monkeypatch.setattr(
+        "huggingface_hub.try_to_load_from_cache",
+        lambda repo, filename: str(config) if repo == "openai/whisper-base" else None,
+    )
+
+    assert asr_backend._local_model_source("openai/whisper-base") == str(snapshot)
+    (snapshot / "model.safetensors").unlink()
+    assert asr_backend._local_model_source("openai/whisper-base") == "openai/whisper-base"
