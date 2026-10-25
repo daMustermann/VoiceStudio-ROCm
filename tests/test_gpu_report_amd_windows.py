@@ -17,6 +17,7 @@ any CI OS.
 """
 from __future__ import annotations
 
+import sys
 import types
 
 import pytest
@@ -392,8 +393,13 @@ def _fake_venv(tmp_path, version_py: str):
     site = tmp_path / ".venv" / "lib" / "python3.11" / "site-packages" / "torch"
     site.mkdir(parents=True, exist_ok=True)
     (site / "version.py").write_text(version_py)
+    win_site = tmp_path / ".venv" / "Lib" / "site-packages" / "torch"
+    win_site.mkdir(parents=True, exist_ok=True)
+    (win_site / "version.py").write_text(version_py)
     (tmp_path / ".venv" / "bin").mkdir(parents=True, exist_ok=True)
     (tmp_path / ".venv" / "bin" / "python").write_text("")
+    (tmp_path / ".venv" / "Scripts").mkdir(parents=True, exist_ok=True)
+    (tmp_path / ".venv" / "Scripts" / "python.exe").write_text("")
 
 
 def test_indextts_does_not_claim_rocm_when_its_venv_holds_a_cuda_torch(tmp_path, monkeypatch):
@@ -443,6 +449,7 @@ def test_indextts_inspects_the_managed_default_venv_too(tmp_path, monkeypatch):
     assert IndexTTS2Backend.runtime_compute_profile(caps)["routing_status"] == "cpu_fallback"
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="Linux PCI sysfs paths contain colons")
 def test_linux_intel_arc_is_found_without_a_vram_figure(tmp_path, symlink_or_skip):
     """i915/xe expose no mem_info_vram_total, so Arc used to read 0 GB and be
     dropped as noise. A card behind a bridge is discrete; the iGPU at 00:02.0

@@ -565,6 +565,11 @@ def test_partial_install_is_not_already_installed(monkeypatch):
     py = si._venv_python(checkout / ".venv")
     py.parent.mkdir(parents=True)
     py.write_text("#!fake\n")
+    # This suite simulates Linux and Windows within one process: create both
+    # interpreter layouts before the individual tests switch sys.platform.
+    unix_py = checkout / ".venv" / "bin" / "python"
+    unix_py.parent.mkdir(parents=True, exist_ok=True)
+    unix_py.write_text("#!fake\n")
     assert si._healthy(spec) is False
 
     # Complete the weights (incl. the completion marker) and the install
@@ -1575,9 +1580,13 @@ def _mk_complete_indextts2_install(monkeypatch, torch_version_py: str):
     (checkout / "pyproject.toml").write_text("[project]\nname='index-tts'\n")
     (checkout / spec.source_required_path).write_text("# fake infer\n")
     si._write_source_marker(spec, checkout)
-    py = si._venv_python(checkout / ".venv")
-    py.parent.mkdir(parents=True)
-    py.write_text("#!fake\n")
+    # These tests simulate both Linux and Windows on the same host.
+    for py in (
+        checkout / ".venv" / "Scripts" / "python.exe",
+        checkout / ".venv" / "bin" / "python",
+    ):
+        py.parent.mkdir(parents=True, exist_ok=True)
+        py.write_text("#!fake\n")
     _write_weights(
         checkout / spec.weights_subdir,
         complete=True,
@@ -1588,6 +1597,9 @@ def _mk_complete_indextts2_install(monkeypatch, torch_version_py: str):
     torch_dir = checkout / ".venv" / "lib" / "python3.11" / "site-packages" / "torch"
     torch_dir.mkdir(parents=True)
     (torch_dir / "version.py").write_text(torch_version_py)
+    win_torch_dir = checkout / ".venv" / "Lib" / "site-packages" / "torch"
+    win_torch_dir.mkdir(parents=True, exist_ok=True)
+    (win_torch_dir / "version.py").write_text(torch_version_py)
     return spec
 
 
