@@ -465,6 +465,8 @@
   "clone": {
     "system_audio_title": "Enregistrer le son du PC",
     "system_audio_hint": "Lisez une vidéo ou un son, puis lancez et arrêtez l’enregistrement. Audio système sur Windows.",
+    "clean_system_audio": "Nettoyer l’audio du PC",
+    "clean_system_audio_hint": "Facultatif : sépare la voix de la musique, mais peut modifier sensiblement le timbre.",
     "record_system_audio": "Enregistrer le son du PC",
     "system_audio_unavailable": "Capture audio du PC indisponible. Vérifiez Windows et le partage d’écran.",
     "text_label": "Texte",
@@ -2924,6 +2926,7 @@
     "mic_busy": "Le microphone est utilisé par une autre application.",
     "mic_error": "Impossible de démarrer l’enregistrement : {{message}}",
     "loaded_raw": "Enregistrement chargé (brut — débruitage indisponible)",
+    "loaded_original": "Enregistrement original chargé sans nettoyage.",
     "too_short": "Enregistrement trop court",
     "cleaned_loaded": "Enregistrement nettoyé et chargé.",
     "recorder_unsupported": "Ce système ne peut pas encoder le son du microphone.",

@@ -37,6 +37,12 @@ bun run setup:api
 bun run desktop
 ```
 
+After the one-time setup, **double-click `Start-VoiceStudio-ROCm.bat`** in the
+repository root to launch on Windows. The launcher rebuilds changed UI code and
+opens Electron directly, without leaving a Vite development watcher running.
+Closing the VoiceStudio window shuts down its managed Python backend and native
+helpers as well. Do not start a separate `bun run dev:api` for this workflow.
+
 The ROCm wheels for this setup require **Python 3.11 x64**. ROCm uses the
 `torch.cuda` API through HIP, even on AMD hardware. To force the tested
 speech-to-text engine before starting the app, set:
@@ -157,7 +163,7 @@ Or download from [Releases](https://github.com/debpalash/VoiceStudio/releases/la
 | Windows on ARM (Snapdragon X etc.) | **Experimental**, validation pending: native ARM64 app, x64 Python backend under emulation, CPU only |
 | Intel Mac | App UI only; connect to a remote backend ([why](docs/install/macos.md)) |
 
-Open **Voice cloning**, choose a voice or add a clean reference recording, enter your text, and generate. References can be uploaded, recorded from a microphone, or recorded directly from PC playback (Windows: click **Record PC audio** while a video or sound is playing, then click **Stop**). PC playback recording uses Electron's Windows system loopback; other desktop systems may require uploading an audio file. This ROCm fork excludes GitHub star counts, usage telemetry, and VoiceStudio Cloud accounts. Install the required model when prompted. Hardware needs vary by engine; see [performance](docs/performance.md).
+Open **Voice cloning**, choose a voice or add a clean reference recording, enter your text, and generate. References can be uploaded, recorded from a microphone, or recorded directly from PC playback (Windows: click **Record PC audio** while a video or sound is playing, then click **Stop**). PC playback recording uses Electron's Windows system loopback at a 256 kb/s Opus target bitrate and now **keeps the recorded audio without cleanup by default**. To isolate a voice from background music, enable **Clean PC audio** before recording. This opt-in uses Demucs source separation, which may change the speaker's tone even with clean audio. The original option preserves the captured WebM/Opus file without further denoising or sample-rate conversion (the capture encoding itself is lossy). Other desktop systems may require uploading an audio file. This ROCm fork excludes GitHub star counts, usage telemetry, and VoiceStudio Cloud accounts. Install the required model when prompted. Hardware needs vary by engine; see [performance](docs/performance.md).
 
 ### Install upstream with a prompt
 

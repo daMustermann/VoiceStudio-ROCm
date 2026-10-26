@@ -463,6 +463,8 @@
   "clone": {
     "system_audio_title": "Rekam audio PC",
     "system_audio_hint": "Putar video atau audio, lalu tekan Rekam dan Berhenti. Audio sistem di Windows.",
+    "clean_system_audio": "Bersihkan audio PC",
+    "clean_system_audio_hint": "Opsional: memisahkan suara dari musik, tetapi dapat mengubah warna suara.",
     "record_system_audio": "Rekam audio PC",
     "system_audio_unavailable": "Tidak dapat merekam audio PC. Periksa Windows dan izin berbagi layar.",
     "text_label": "Teks",
@@ -2922,6 +2924,7 @@
     "mic_busy": "Mikrofon sedang digunakan aplikasi lain.",
     "mic_error": "Tidak dapat memulai perekaman: {{message}}",
     "loaded_raw": "Rekaman dimuat (mentah — penghilang derau tidak tersedia)",
+    "loaded_original": "Rekaman asli dimuat tanpa pembersihan.",
     "too_short": "Rekaman terlalu pendek",
     "cleaned_loaded": "Rekaman dibersihkan dan dimuat.",
     "recorder_unsupported": "Sistem ini tidak dapat mengodekan audio mikrofon.",

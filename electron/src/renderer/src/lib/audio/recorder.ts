@@ -57,6 +57,7 @@ export interface RecorderCallbacks {
   onData: (chunk: Blob) => void;
   onStop: () => void;
   timesliceMs?: number;
+  audioBitsPerSecond?: number;
 }
 
 /**
@@ -67,7 +68,7 @@ export interface RecorderCallbacks {
  */
 export function startSupportedMediaRecorder(
   stream: MediaStream,
-  { onData, onStop, timesliceMs = 250 }: RecorderCallbacks,
+  { onData, onStop, timesliceMs = 250, audioBitsPerSecond }: RecorderCallbacks,
 ): StartedRecorder | null {
   if (typeof MediaRecorder !== 'function') return null;
   const canProbe = typeof MediaRecorder.isTypeSupported === 'function';
@@ -79,9 +80,10 @@ export function startSupportedMediaRecorder(
   for (const candidate of candidates) {
     let recorder: MediaRecorder | undefined;
     try {
-      recorder = candidate.mimeType
-        ? new MediaRecorder(stream, { mimeType: candidate.mimeType })
-        : new MediaRecorder(stream);
+      const options: MediaRecorderOptions = {};
+      if (candidate.mimeType) options.mimeType = candidate.mimeType;
+      if (audioBitsPerSecond) options.audioBitsPerSecond = audioBitsPerSecond;
+      recorder = new MediaRecorder(stream, options);
       recorder.ondataavailable = (event: BlobEvent) => {
         if (event.data.size > 0) onData(event.data);
       };

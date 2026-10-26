@@ -101,18 +101,28 @@ async function flushRendererPersistence(): Promise<void> {
 }
 
 async function tearDownNativeResources(): Promise<void> {
-  closeWatch?.();
+  // One optional service failing to close must never strand the Python backend
+  // or prevent Electron from exiting after the last window is closed.
+  const safelyClose = (name: string, close: (() => void) | null): void => {
+    try {
+      close?.();
+    } catch (error) {
+      console.warn(`[shutdown] ${name} cleanup failed`, error);
+    }
+  };
+  safelyClose('watch folders', closeWatch);
   closeWatch = null;
-  closeCapture?.();
+  safelyClose('native capture', closeCapture);
   closeCapture = null;
-  closeUpdates?.();
+  safelyClose('updater', closeUpdates);
   closeUpdates = null;
-  closeRepairAgents?.();
+  safelyClose('repair agents', closeRepairAgents);
   closeRepairAgents = null;
-  tray?.destroy();
+  safelyClose('tray', () => tray?.destroy());
   tray = null;
-  const proxyTeardown = closeDevProxy?.() ?? Promise.resolve();
+  const stopDevProxy = closeDevProxy;
   closeDevProxy = null;
+  const proxyTeardown = Promise.resolve().then(() => stopDevProxy?.());
   await Promise.allSettled([supervisor?.shutdown() ?? Promise.resolve(), proxyTeardown]);
 }
 
@@ -172,21 +182,11 @@ function createWindow(): BrowserWindow {
   win.on('close', (event) => {
     if (quitting) return;
     event.preventDefault();
-    if (process.platform === 'darwin') {
-      observeMainProcessTask(
-        flushRendererPersistence().finally(() => {
-          if (!win.isDestroyed()) win.destroy();
-        }),
-        mainErrors,
-        'Window persistence flush',
-      );
-      return;
-    }
     observeMainProcessTask(beginOrderlyQuit(), mainErrors, 'Orderly quit');
   });
   win.on('closed', () => {
     if (mainWindow === win) mainWindow = null;
-    if (process.platform !== 'darwin' && !quitting) app.quit();
+    if (!quitting) app.quit();
   });
   wireWindowMaximizeEvents(win);
   installBlankWindowGuard(
@@ -370,7 +370,7 @@ if (process.env.VOICESTUDIO_ALLOW_MULTIPLE_INSTANCES !== '1' && !app.requestSing
     });
 
   app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') app.quit();
+    app.quit();
   });
 
   // The first pass gives renderer persistence a bounded chance to settle, then

@@ -465,6 +465,8 @@
   "clone": {
     "system_audio_title": "Grabar audio del PC",
     "system_audio_hint": "Reproduce un vídeo o audio, pulsa Grabar y luego Detener. Audio del sistema en Windows.",
+    "clean_system_audio": "Limpiar audio del PC",
+    "clean_system_audio_hint": "Opcional: separa la voz de la música, pero puede alterar notablemente su timbre.",
     "record_system_audio": "Grabar audio del PC",
     "system_audio_unavailable": "No se puede capturar el audio del PC. Comprueba Windows y los permisos de pantalla.",
     "text_label": "Texto",
@@ -2925,6 +2927,7 @@
     "mic_busy": "Otra aplicación está usando el micrófono.",
     "mic_error": "No se pudo iniciar la grabación: {{message}}",
     "loaded_raw": "Grabación cargada (sin procesar — eliminación de ruido no disponible)",
+    "loaded_original": "Grabación original cargada sin limpieza.",
     "too_short": "Grabación demasiado corta",
     "cleaned_loaded": "Grabación limpiada y cargada.",
     "recorder_unsupported": "Este sistema no puede codificar el audio del micrófono.",

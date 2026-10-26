@@ -120,7 +120,7 @@ it('captures PC playback as audio-only, cleans the clip, and releases display tr
     } as unknown as MediaRecorder,
   }));
   const onRecorded = vi.fn();
-  const { result } = renderHook(() => useRecording(onRecorded, true, 'system'));
+  const { result } = renderHook(() => useRecording(onRecorded, true, 'system', true));
   await act(async () => result.current.start());
   expect(getDisplayMedia).toHaveBeenCalledWith({ video: true, audio: true });
   expect(getUserMedia).not.toHaveBeenCalled();
@@ -132,6 +132,46 @@ it('captures PC playback as audio-only, cleans the clip, and releases display tr
   expect(recorderStop).toHaveBeenCalledOnce();
   expect(videoStop).toHaveBeenCalledOnce();
   expect(audioStop).toHaveBeenCalledOnce();
+});
+
+it('loads PC audio without processing by default and uses a higher recording bitrate', async () => {
+  const audioStop = vi.fn();
+  const videoStop = vi.fn();
+  const audio = { stop: audioStop } as unknown as MediaStreamTrack;
+  const video = { stop: videoStop, addEventListener: vi.fn() } as unknown as MediaStreamTrack;
+  getDisplayMedia.mockResolvedValue({
+    getTracks: () => [audio, video],
+    getVideoTracks: () => [video],
+    getAudioTracks: () => [audio],
+  });
+  vi.stubGlobal(
+    'MediaStream',
+    class {
+      constructor(public tracks: MediaStreamTrack[]) {}
+    },
+  );
+  vi.mocked(startSupportedMediaRecorder).mockImplementation((_stream, callbacks) => ({
+    mimeType: 'audio/webm',
+    extension: 'webm',
+    recorder: {
+      state: 'recording',
+      stop: () => {
+        callbacks.onData(new Blob(['original'.repeat(300)], { type: 'audio/webm' }));
+        callbacks.onStop();
+      },
+    } as unknown as MediaRecorder,
+  }));
+  const onRecorded = vi.fn();
+  const { result } = renderHook(() => useRecording(onRecorded, true, 'system'));
+  await act(async () => result.current.start());
+  expect(vi.mocked(startSupportedMediaRecorder).mock.calls[0][1].audioBitsPerSecond).toBe(256_000);
+  act(() => result.current.stop());
+  await waitFor(() => expect(onRecorded).toHaveBeenCalledOnce());
+  expect(onRecorded.mock.calls[0][0].name).toBe('recording.webm');
+  expect(await onRecorded.mock.calls[0][0].text()).toBe('original'.repeat(300));
+  expect(cleanAudio).not.toHaveBeenCalled();
+  expect(audioStop).toHaveBeenCalledOnce();
+  expect(videoStop).toHaveBeenCalledOnce();
 });
 
 it('rejects PC capture without loopback audio and releases the display track', async () => {

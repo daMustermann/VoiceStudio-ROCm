@@ -467,6 +467,8 @@
   "clone": {
     "system_audio_title": "Nagraj dźwięk komputera",
     "system_audio_hint": "Odtwórz wideo lub dźwięk, a potem naciśnij Nagraj i Zatrzymaj. Dźwięk systemowy w Windows.",
+    "clean_system_audio": "Oczyść dźwięk z komputera",
+    "clean_system_audio_hint": "Opcjonalnie: oddziela głos od muzyki, ale może zmienić jego brzmienie.",
     "record_system_audio": "Nagraj dźwięk komputera",
     "system_audio_unavailable": "Nie można nagrać dźwięku komputera. Sprawdź Windows i udostępnianie ekranu.",
     "text_label": "Tekst",
@@ -2926,6 +2928,7 @@
     "mic_busy": "Mikrofon jest używany przez inną aplikację.",
     "mic_error": "Nie udało się rozpocząć nagrywania: {{message}}",
     "loaded_raw": "Nagranie załadowane (surowe — odszumianie niedostępne)",
+    "loaded_original": "Wczytano oryginalne nagranie bez obróbki.",
     "too_short": "Nagranie zbyt krótkie",
     "cleaned_loaded": "Nagranie oczyszczone i wczytane.",
     "recorder_unsupported": "Ten system nie może kodować dźwięku z mikrofonu.",

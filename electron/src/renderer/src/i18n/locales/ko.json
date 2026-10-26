@@ -463,6 +463,8 @@
   "clone": {
     "system_audio_title": "PC 오디오 녹음",
     "system_audio_hint": "동영상이나 오디오를 재생한 뒤 녹음 및 중지를 누르세요. Windows 시스템 오디오 지원.",
+    "clean_system_audio": "PC 오디오 정리",
+    "clean_system_audio_hint": "선택 사항: 음성을 음악과 분리하지만 목소리 톤이 달라질 수 있습니다.",
     "record_system_audio": "PC 오디오 녹음",
     "system_audio_unavailable": "PC 오디오를 캡처할 수 없습니다. Windows 화면 공유와 오디오를 확인하세요.",
     "text_label": "텍스트",
@@ -2924,6 +2926,7 @@
     "mic_busy": "다른 앱이 마이크를 사용 중입니다.",
     "mic_error": "녹음을 시작할 수 없습니다: {{message}}",
     "loaded_raw": "녹음이 로드되었습니다 (원본 — 노이즈 제거 사용 불가)",
+    "loaded_original": "원본 녹음을 보정 없이 불러왔습니다.",
     "too_short": "녹음이 너무 짧습니다",
     "cleaned_loaded": "녹음의 잡음을 제거하고 불러왔습니다.",
     "recorder_unsupported": "이 시스템에서는 마이크 오디오를 인코딩할 수 없습니다."

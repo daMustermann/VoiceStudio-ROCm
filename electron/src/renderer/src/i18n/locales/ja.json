@@ -463,6 +463,8 @@
   "clone": {
     "system_audio_title": "PC音声を録音",
     "system_audio_hint": "動画や音声を再生し、録音して停止します。Windowsでシステム音声に対応。",
+    "clean_system_audio": "PC音声をクリーンアップ",
+    "clean_system_audio_hint": "任意：声を音楽から分離しますが、声質が変わることがあります。",
     "record_system_audio": "PC音声を録音",
     "system_audio_unavailable": "PC音声を取得できません。Windowsの画面共有と音声再生を確認してください。",
     "text_label": "テキスト",
@@ -2924,6 +2926,7 @@
     "mic_busy": "マイクは別のアプリで使用中です。",
     "mic_error": "録音を開始できませんでした：{{message}}",
     "loaded_raw": "録音を読み込みました（未処理 — ノイズ除去は利用できません）",
+    "loaded_original": "元の録音を加工せず読み込みました。",
     "too_short": "録音が短すぎます",
     "cleaned_loaded": "録音のノイズを除去して読み込みました。",
     "recorder_unsupported": "このシステムではマイク音声をエンコードできません。"

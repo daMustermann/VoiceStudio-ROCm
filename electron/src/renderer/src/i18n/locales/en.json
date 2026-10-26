@@ -381,6 +381,8 @@
   "clone": {
     "system_audio_title": "Record PC audio",
     "system_audio_hint": "Play a video or audio, then press Record and Stop. System audio on Windows.",
+    "clean_system_audio": "Clean PC audio",
+    "clean_system_audio_hint": "Optional: separates voice from music but may noticeably alter the speaker's tone.",
     "record_system_audio": "Record PC audio",
     "system_audio_unavailable": "PC audio capture unavailable. Check Windows screen sharing and audio playback.",
     "title": "Voice cloning",
@@ -547,6 +549,7 @@
   "recording": {
     "cleaned_loaded": "Recording cleaned and loaded.",
     "loaded_raw": "Recording loaded (raw — denoising unavailable).",
+    "loaded_original": "Original recording loaded without cleanup.",
     "too_short": "Recording too short.",
     "input_device": "Input device",
     "default_input": "System default",

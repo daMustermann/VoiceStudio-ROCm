@@ -463,6 +463,8 @@
   "clone": {
     "system_audio_title": "Pc-audio opnemen",
     "system_audio_hint": "Speel video of audio af en druk op Opnemen en Stoppen. Systeemaudio op Windows.",
+    "clean_system_audio": "Pc-audio opschonen",
+    "clean_system_audio_hint": "Optioneel: scheidt stem van muziek, maar kan de klank van de stem veranderen.",
     "record_system_audio": "Pc-audio opnemen",
     "system_audio_unavailable": "Pc-audio opnemen niet beschikbaar. Controleer Windows en schermdeling.",
     "text_label": "Tekst",
@@ -2922,6 +2924,7 @@
     "mic_busy": "De microfoon wordt door een andere toepassing gebruikt.",
     "mic_error": "Kan de opname niet starten: {{message}}",
     "loaded_raw": "Opname geladen (ruw — ruisonderdrukking niet beschikbaar)",
+    "loaded_original": "Originele opname zonder bewerking geladen.",
     "too_short": "Opname te kort",
     "cleaned_loaded": "Opname opgeschoond en geladen.",
     "recorder_unsupported": "Dit systeem kan microfoonaudio niet coderen.",

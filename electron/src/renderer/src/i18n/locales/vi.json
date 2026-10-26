@@ -463,6 +463,8 @@
   "clone": {
     "system_audio_title": "Ghi âm thanh PC",
     "system_audio_hint": "Phát video hoặc âm thanh, rồi nhấn Ghi và Dừng. Âm thanh hệ thống trên Windows.",
+    "clean_system_audio": "Làm sạch âm thanh PC",
+    "clean_system_audio_hint": "Tùy chọn: tách giọng nói khỏi nhạc nhưng có thể làm thay đổi âm sắc.",
     "record_system_audio": "Ghi âm thanh PC",
     "system_audio_unavailable": "Không thể ghi âm thanh PC. Kiểm tra Windows và quyền chia sẻ màn hình.",
     "text_label": "Văn bản",
@@ -2924,6 +2926,7 @@
     "mic_busy": "Micrô đang được ứng dụng khác sử dụng.",
     "mic_error": "Không thể bắt đầu ghi âm: {{message}}",
     "loaded_raw": "Đã tải bản ghi âm (thô — không có khử nhiễu)",
+    "loaded_original": "Đã tải bản ghi gốc mà không xử lý.",
     "too_short": "Bản ghi âm quá ngắn",
     "cleaned_loaded": "Đã làm sạch và tải bản ghi âm.",
     "recorder_unsupported": "Hệ thống này không thể mã hóa âm thanh từ micrô."

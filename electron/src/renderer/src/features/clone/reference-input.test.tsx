@@ -72,6 +72,17 @@ it('shows the drop zone and the record button together, with no mode toggle', ()
   expect(view.getByText('clone.drop_audio')).toBeTruthy();
   expect(view.getByRole('button', { name: 'clone.record' })).toBeTruthy();
   expect(view.getByRole('button', { name: 'clone.record_system_audio' })).toBeTruthy();
+  expect(view.getByRole('checkbox', { name: /clone.clean_system_audio/ })).not.toHaveProperty(
+    'checked',
+    true,
+  );
+  expect(
+    vi.mocked(useRecording).mock.calls.some((call) => call[2] === 'system' && call[3] === false),
+  ).toBe(true);
+  fireEvent.click(view.getByRole('checkbox', { name: /clone.clean_system_audio/ }));
+  expect(
+    vi.mocked(useRecording).mock.calls.some((call) => call[2] === 'system' && call[3] === true),
+  ).toBe(true);
   expect(view.queryByRole('tablist')).toBeNull();
 });
 

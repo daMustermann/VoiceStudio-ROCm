@@ -463,6 +463,8 @@
   "clone": {
     "system_audio_title": "錄製電腦音訊",
     "system_audio_hint": "播放影片或音訊，再按錄製與停止。Windows 支援系統音訊。",
+    "clean_system_audio": "清理電腦音訊",
+    "clean_system_audio_hint": "選用：將人聲與音樂分離，但可能明顯改變音色。",
     "record_system_audio": "錄製電腦音訊",
     "system_audio_unavailable": "無法錄製電腦音訊。請檢查 Windows 螢幕分享與音訊播放。",
     "text_label": "文字",
@@ -2924,6 +2926,7 @@
     "mic_busy": "其他應用程式正在使用麥克風。",
     "mic_error": "無法開始錄音：{{message}}",
     "loaded_raw": "錄音已載入（原始 — 無法降噪）",
+    "loaded_original": "已載入未經清理的原始錄音。",
     "too_short": "錄音太短",
     "cleaned_loaded": "錄音已降噪並載入。",
     "recorder_unsupported": "此系統無法編碼麥克風音訊。"

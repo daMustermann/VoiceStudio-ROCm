@@ -244,7 +244,8 @@ export function SystemAudioZone({
 }: { onAccept?: AcceptReference; pickToken?: PickToken } = {}) {
   const { t } = useTranslation();
   const ingestFile = useIngest(onAccept, pickToken);
-  const rec = useRecording((file) => void ingestFile(file), true, 'system');
+  const [cleanUp, setCleanUp] = useState(false);
+  const rec = useRecording((file) => void ingestFile(file), true, 'system', cleanUp);
   return (
     <div className="flex min-h-36 flex-col items-center justify-center gap-3 rounded-lg bg-muted/30 p-4 text-center">
       {rec.isStarting || rec.isCleaning ? (
@@ -280,6 +281,19 @@ export function SystemAudioZone({
         <p className="text-sm font-medium">{t('clone.system_audio_title')}</p>
         <p className="text-xs text-muted-foreground">{t('clone.system_audio_hint')}</p>
       </div>
+      <label className="flex cursor-pointer items-start gap-2 text-left text-xs text-muted-foreground">
+        <input
+          type="checkbox"
+          className="mt-0.5 size-4 shrink-0 accent-primary"
+          checked={cleanUp}
+          disabled={rec.isRecording || rec.isStarting || rec.isCleaning}
+          onChange={(event) => setCleanUp(event.target.checked)}
+        />
+        <span>
+          <span className="block font-medium text-foreground">{t('clone.clean_system_audio')}</span>
+          {t('clone.clean_system_audio_hint')}
+        </span>
+      </label>
       {rec.isRecording && (
         <div
           role="meter"

@@ -463,6 +463,8 @@
   "clone": {
     "system_audio_title": "PC-Audio aufnehmen",
     "system_audio_hint": "Video oder Audio abspielen, Aufnahme starten und stoppen. Systemton über Windows.",
+    "clean_system_audio": "PC-Audio bereinigen",
+    "clean_system_audio_hint": "Optional: Trennt Stimme und Musik, kann aber den Stimmklang hörbar verändern.",
     "record_system_audio": "PC-Audio aufnehmen",
     "system_audio_unavailable": "PC-Audio konnte nicht aufgenommen werden. Prüfe die Bildschirmfreigabe und Windows-Audiowiedergabe.",
     "text_label": "Text",
@@ -2922,6 +2924,7 @@
     "mic_busy": "Das Mikrofon wird von einer anderen Anwendung verwendet.",
     "mic_error": "Aufnahme konnte nicht gestartet werden: {{message}}",
     "loaded_raw": "Aufnahme geladen (roh — Entrauschen nicht verfügbar)",
+    "loaded_original": "Originalaufnahme unverändert geladen.",
     "too_short": "Aufnahme zu kurz",
     "cleaned_loaded": "Aufnahme bereinigt und geladen.",
     "recorder_unsupported": "Dieses System kann Mikrofon-Audio nicht kodieren.",

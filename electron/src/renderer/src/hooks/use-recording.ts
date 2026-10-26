@@ -39,14 +39,14 @@ export interface UseRecording {
 }
 
 /**
- * Microphone / system output recording → backend denoise → `onRecorded(file)`. Falls back to
- * the raw recording when `/clean-audio` is unavailable so a missing denoiser
- * never blocks cloning.
+ * Record a reference clip. Microphones may use optional source separation;
+ * system output defaults to the original clip to preserve the speaker's timbre.
  */
 export function useRecording(
   onRecorded: (file: File) => void,
   trackReference = true,
   source: 'microphone' | 'system' = 'microphone',
+  cleanUp = source === 'microphone',
 ): UseRecording {
   const onRecordedRef = useRef(onRecorded);
   useEffect(() => {
@@ -155,9 +155,16 @@ export function useRecording(
         return;
       }
       const generation = lifecycle.current;
+      const filename = `recording.${extension}`;
+      if (!cleanUp) {
+        if (generation === lifecycle.current) {
+          onRecordedRef.current(new File([blob], filename, { type: blob.type }));
+          toast.success(tr('recording.loaded_original'));
+        }
+        return;
+      }
       const request = new AbortController();
       cleaningRequest.current = request;
-      const filename = `recording.${extension}`;
       setIsCleaning(true);
       try {
         const clean = await cleanAudio(blob, filename, request.signal);
@@ -173,7 +180,7 @@ export function useRecording(
         if (generation === lifecycle.current) setIsCleaning(false);
       }
     },
-    [clearTimer, stopLevelMonitor, releaseStream],
+    [clearTimer, stopLevelMonitor, releaseStream, cleanUp],
   );
 
   const start = useCallback(async () => {
@@ -215,6 +222,9 @@ export function useRecording(
       // feeding it into MediaRecorder would create video instead of voice input.
       const recordingStream = source === 'system' ? new MediaStream(audioTracks) : stream;
       const started = startSupportedMediaRecorder(recordingStream, {
+        // Opus at Chromium's default bitrate can audibly soften voice details.
+        // A higher target bitrate helps preserve timbre for clean PC recordings.
+        ...(source === 'system' ? { audioBitsPerSecond: 256_000 } : {}),
         onData: (chunk) => {
           if (chunk.type)
             format = { mimeType: chunk.type, extension: extensionForMime(chunk.type) };

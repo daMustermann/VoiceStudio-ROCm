@@ -463,6 +463,8 @@
   "clone": {
     "system_audio_title": "PC sesini kaydet",
     "system_audio_hint": "Video veya ses oynatın, ardından Kaydet ve Durdur düğmelerine basın. Windows sistem sesi.",
+    "clean_system_audio": "Bilgisayar sesini temizle",
+    "clean_system_audio_hint": "İsteğe bağlı: sesi müzikten ayırır ancak ses tonunu değiştirebilir.",
     "record_system_audio": "PC sesini kaydet",
     "system_audio_unavailable": "PC sesi yakalanamıyor. Windows ve ekran paylaşımı izinlerini kontrol edin.",
     "text_label": "Metin",
@@ -2922,6 +2924,7 @@
     "mic_busy": "Mikrofon başka bir uygulama tarafından kullanılıyor.",
     "mic_error": "Kayıt başlatılamadı: {{message}}",
     "loaded_raw": "Kayıt yüklendi (ham — gürültü giderme kullanılamıyor)",
+    "loaded_original": "Orijinal kayıt temizlenmeden yüklendi.",
     "too_short": "Kayıt çok kısa",
     "cleaned_loaded": "Kayıt temizlendi ve yüklendi.",
     "recorder_unsupported": "Bu sistem mikrofon sesini kodlayamıyor.",

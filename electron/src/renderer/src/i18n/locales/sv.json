@@ -463,6 +463,8 @@
   "clone": {
     "system_audio_title": "Spela in datorljud",
     "system_audio_hint": "Spela upp video eller ljud och tryck på Spela in och Stoppa. Systemljud på Windows.",
+    "clean_system_audio": "Rensa datorljud",
+    "clean_system_audio_hint": "Valfritt: skiljer rösten från musik men kan ändra röstens klang.",
     "record_system_audio": "Spela in datorljud",
     "system_audio_unavailable": "Kan inte spela in datorljud. Kontrollera Windows och skärmdelning.",
     "text_label": "Text",
@@ -2922,6 +2924,7 @@
     "mic_busy": "Mikrofonen används av en annan app.",
     "mic_error": "Kunde inte starta inspelningen: {{message}}",
     "loaded_raw": "Inspelningen laddad (rå — brusreducering otillgänglig)",
+    "loaded_original": "Originalinspelningen laddades utan bearbetning.",
     "too_short": "Inspelningen är för kort",
     "cleaned_loaded": "Inspelningen har rensats och lästs in.",
     "recorder_unsupported": "Det här systemet kan inte koda mikrofonljud.",

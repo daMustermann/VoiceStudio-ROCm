@@ -477,6 +477,8 @@
   "clone": {
     "system_audio_title": "录制电脑音频",
     "system_audio_hint": "播放视频或音频，然后点击录制和停止。Windows 支持系统音频。",
+    "clean_system_audio": "清理电脑音频",
+    "clean_system_audio_hint": "可选：将人声与音乐分离，但可能明显改变音色。",
     "record_system_audio": "录制电脑音频",
     "system_audio_unavailable": "无法录制电脑音频。请检查 Windows 屏幕共享和音频播放。",
     "text_label": "文本",
@@ -2924,6 +2926,7 @@
     "mic_busy": "其他应用正在使用麦克风。",
     "mic_error": "无法开始录音：{{message}}",
     "loaded_raw": "录音已加载（原始音频——降噪不可用）",
+    "loaded_original": "已加载未经清理的原始录音。",
     "too_short": "录音太短",
     "cleaned_loaded": "录音已降噪并加载。",
     "recorder_unsupported": "此系统无法编码麦克风音频。"

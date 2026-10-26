@@ -465,6 +465,8 @@
   "clone": {
     "system_audio_title": "Registra audio del PC",
     "system_audio_hint": "Riproduci un video o audio, poi avvia e ferma la registrazione. Audio di sistema su Windows.",
+    "clean_system_audio": "Pulisci audio del PC",
+    "clean_system_audio_hint": "Facoltativo: separa la voce dalla musica, ma può alterarne il timbro.",
     "record_system_audio": "Registra audio del PC",
     "system_audio_unavailable": "Acquisizione audio del PC non disponibile. Controlla Windows e la condivisione schermo.",
     "text_label": "Testo",
@@ -2924,6 +2926,7 @@
     "mic_busy": "Il microfono è utilizzato da un’altra applicazione.",
     "mic_error": "Impossibile avviare la registrazione: {{message}}",
     "loaded_raw": "Registrazione caricata (grezza — eliminazione del rumore non disponibile)",
+    "loaded_original": "Registrazione originale caricata senza pulizia.",
     "too_short": "Registrazione troppo breve",
     "cleaned_loaded": "Registrazione ripulita e caricata.",
     "recorder_unsupported": "Questo sistema non può codificare l’audio del microfono.",
