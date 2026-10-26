@@ -109,11 +109,10 @@ def _amd_unusable_note() -> str:
     """Why an AMD card sits idle, per OS - and only options that really exist."""
     if sys.platform == "win32":
         return (
-            "AMD GPU detected, but this install's PyTorch (the NVIDIA CUDA or "
-            "CPU-only build) cannot drive it, and no ROCm build of the PyTorch "
-            "version VoiceStudio ships exists for Windows. PyTorch "
-            "engines run on the CPU; audio.cpp (Vulkan) can use the GPU - see "
-            "Settings > Performance for the per-engine list."
+            "AMD GPU detected but the active PyTorch environment cannot use ROCm. "
+            "Install the Windows ROCm 10.1 / PyTorch 2.14 build documented in "
+            "README.md and check torch.version.hip and torch.cuda.is_available(). "
+            "Settings > Performance lists acceleration for each engine."
         )
     return (
         "AMD GPU detected but torch was installed with CUDA wheels. Set "
@@ -565,7 +564,7 @@ def preflight():
             "engines remain unavailable."
         )
     elif gpu["vendor"] == "amd":
-        gpu_status = "warn"
+        gpu_status = "pass" if gpu["available"] else "warn"
         gpu_detail = (
             f"{gpu['device_name']} — ROCm "
             + ("ready" if gpu["available"] else "not configured")

@@ -23,6 +23,21 @@ with an opt-in Windows AMD PyTorch stack. The tested combination is an
 **RX 7900 XTX (gfx1100)** with **PyTorch 2.14.0+rocm10.1.0** and **ROCm 10.1**.
 Other AMD GPU architectures and individual speech engines may need more work.
 
+### What's different in this fork
+
+| Area | VoiceStudio ROCm behavior |
+| --- | --- |
+| Windows GPU | Tested RX 7900 XTX (gfx1100), ROCm 10.1, PyTorch 2.14.0; the setup GPU check shows **green** when PyTorch confirms a usable HIP device, and a warning when it cannot |
+| Voice cloning | Record microphone or **PC playback audio** as the reference; PC recording keeps the original capture by default, with voice cleanup available only when selected |
+| Startup and shutdown | Double-click `Start-VoiceStudio-ROCm.bat`; closing the Electron window also stops its managed backend and helpers |
+| UI | No Pro purchase prompts, donation/sponsor placements, GitHub star counter, Cloud accounts or usage telemetry |
+| Generated audio | AudioSeal/invisible audio watermarking and the optional audio brand tone are disabled; no audio watermark setting or detection endpoint |
+
+This is a **local-first community fork**, not an official upstream release or
+installer. The changes above apply when running this branch, not an upstream
+download. A configurable **video logo overlay** is separate from audio
+watermarking and remains available for video exports.
+
 **Install from this fork's `rocm` branch** on Windows x64. You need Git,
 Node.js 22+, Bun, a compatible AMD driver and enough space for the Python
 environment and models. Run in PowerShell:
@@ -51,6 +66,21 @@ speech-to-text engine before starting the app, set:
 $env:OMNIVOICE_ASR_BACKEND = 'pytorch-whisper'
 $env:OMNIVOICE_PYTORCH_ASR_MODEL = 'openai/whisper-base'
 ```
+
+### Record PC audio for voice cloning
+
+Open **Voice cloning**, choose a voice or add a reference recording, enter your
+text, and generate. On Windows, start playing a video or other audio source,
+click **Record PC audio**, and then click **Stop** to use that playback as the
+voice reference. Microphone recordings and uploaded audio also work.
+
+PC audio is used **without cleanup by default**, preserving the recorded voice.
+Enable **Clean PC audio** only when you need Demucs to separate speech from
+music or noise: even a clean source may sound different after separation.
+System loopback recording uses a 256 kb/s Opus target bitrate. Avoiding cleanup
+prevents additional denoising or resampling, but Opus capture itself is lossy.
+Other desktop platforms may require uploading an audio file. Install the model
+for your selected engine when prompted; see [performance](docs/performance.md).
 
 ### Acceleration status
 
@@ -93,7 +123,9 @@ other cards, models, and operating systems need their own validation.
 
 Start with **VoiceStudio** (default, powered by k2-fsa/OmniVoice), or choose another engine. [Features & engine catalog](docs/feature-catalog.md).
 
-Local workflows run on your hardware. Remote services are optional; usage analytics requires consent.
+Local workflows run on your hardware. Some explicitly chosen model downloads and
+remote integrations still require network access; this fork does not collect
+usage telemetry.
 
 <details>
 <summary><strong>Explore the workspaces</strong> · Clone, dub, design & models</summary>
@@ -163,8 +195,6 @@ Or download from [Releases](https://github.com/debpalash/VoiceStudio/releases/la
 | Windows on ARM (Snapdragon X etc.) | **Experimental**, validation pending: native ARM64 app, x64 Python backend under emulation, CPU only |
 | Intel Mac | App UI only; connect to a remote backend ([why](docs/install/macos.md)) |
 
-Open **Voice cloning**, choose a voice or add a clean reference recording, enter your text, and generate. References can be uploaded, recorded from a microphone, or recorded directly from PC playback (Windows: click **Record PC audio** while a video or sound is playing, then click **Stop**). PC playback recording uses Electron's Windows system loopback at a 256 kb/s Opus target bitrate and now **keeps the recorded audio without cleanup by default**. To isolate a voice from background music, enable **Clean PC audio** before recording. This opt-in uses Demucs source separation, which may change the speaker's tone even with clean audio. The original option preserves the captured WebM/Opus file without further denoising or sample-rate conversion (the capture encoding itself is lossy). Other desktop systems may require uploading an audio file. This ROCm fork excludes GitHub star counts, usage telemetry, and VoiceStudio Cloud accounts. Install the required model when prompted. Hardware needs vary by engine; see [performance](docs/performance.md).
-
 ### Install upstream with a prompt
 
 Paste into your coding agent (Claude Code, Codex, Cursor, …):
@@ -210,13 +240,7 @@ Add `-- --install` for the networked managed-runtime installation check.
 
 Agent skills: `npx skills add debpalash/VoiceStudio` — choose **voicestudio** for audio workflows or **voicestudio-maintainer** for repository maintenance.
 
-## Support the upstream maintainers
-
-Sponsorship funds maintainer time, development tools, release infrastructure and test hardware; it buys recognition, not features.
-
-[GitHub Sponsors](https://github.com/sponsors/debpalash) · [Ko-fi](https://ko-fi.com/debpalash) · [PayPal](https://paypal.me/palashCoder) · [Tiers and recognition](SPONSORS.md) · [Ask for recognition](https://github.com/debpalash/VoiceStudio/issues/new?template=sponsor.yml)
-
 ## License & responsible use
 
-[AGPL-3.0](LICENSE) covers the application, including commercial use under its conditions. Model weights, tokenizers, voices and generated-output conditions are separate; a paid app licence does not grant those rights. Clone voices only with permission. Model Manager now shows versioned model-source notices, evidence links and unresolved review gaps from the [shared inventory](docs/licensing/model-inventory.md). Its optional [reviewed-file preview](docs/licensing/model-review-workflow.md) does not enforce ordinary downloads or certify commercial permission. See [license details](LICENSE-NOTICE.md).
+[AGPL-3.0](LICENSE) covers the application, including commercial use under its conditions. Model weights, tokenizers, voices and generated outputs can have separate licence restrictions. Clone voices only with permission. Model Manager shows versioned model-source notices, evidence links and unresolved review gaps from the [shared inventory](docs/licensing/model-inventory.md). Its optional [reviewed-file preview](docs/licensing/model-review-workflow.md) does not enforce ordinary downloads or certify commercial permission. See [license details](LICENSE-NOTICE.md).
 

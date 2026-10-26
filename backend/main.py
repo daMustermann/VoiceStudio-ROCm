@@ -451,16 +451,6 @@ def _capture_preload_delay_s() -> float:
     overridable via OMNIVOICE_CAPTURE_PRELOAD_DELAY (mostly for tests)."""
     return _env_float("OMNIVOICE_CAPTURE_PRELOAD_DELAY", 30.0)
 
-def _watermark_preload_delay_s() -> float:
-    """Seconds after boot before the AudioSeal generator warm-up fires.
-
-    Own knob, NOT ``_capture_preload_delay_s`` + offset: a capture-specific
-    env override must not retime the watermark warm too, and the two cold
-    imports shouldn't fire on the same tick (CodeRabbit, PR #1577). Default
-    35s sits ~5s past the capture-ASR warm for the same reason."""
-    return _env_float("OMNIVOICE_PRELOAD_WATERMARK_DELAY", 35.0)
-
-
 def _capture_preload_ram_ok(min_free_bytes: int = 4 * 1024**3) -> bool:
     """RAM guard for the dictation warm-up: skip below 4 GB free so the
     background load never pushes a small machine into swap. If free memory
@@ -1126,50 +1116,6 @@ async def _phase_b(app: FastAPI) -> None:
     else:
         logger.info("Capture ASR preload disabled; dictation ASR will load on first use.")
 
-    # Watermark: warm the AudioSeal generator in the background so the first
-    # mark_synthetic doesn't serialize the audioseal import + model load
-    # inside the first synthesis (measured ~42 s inline on a cold filesystem,
-    # 2026-08-17 macOS report — 3 s short of the client's 90 s timeout).
-    # Small model on CPU; deferred a few seconds past the capture-ASR warm so
-    # the two cold imports don't contend for the same disk, and no RAM guard
-    # is needed. Runs on the watermark pool — where the model is used — not
-    # the shared default executor.
-    if _env_flag("OMNIVOICE_PRELOAD_WATERMARK", default=True):
-        async def _preload_watermark():
-            await asyncio.sleep(_watermark_preload_delay_s())
-            loop = asyncio.get_running_loop()
-            from services import watermark as _watermark
-
-            # Gate BEFORE touching get_watermark_pool(): the pool is lazy so
-            # hosts with watermarking disabled never spawn its thread, and
-            # creating it unconditionally would break that invariant. The
-            # race with a first embed is benign — pool creation is itself
-            # lock-guarded.
-            if not _watermark.will_mark():
-                logger.debug("Watermark preload skipped (disabled or audioseal absent)")
-                return
-            from services.model_manager import get_watermark_pool
-
-            # Default startup may warm an existing local checkpoint but may
-            # not fetch one. Only an explicit user opt-in permits a download.
-            raw_preload = os.environ.get("OMNIVOICE_PRELOAD_WATERMARK", "")
-            allow_download = raw_preload.strip().lower() in {"1", "true", "yes", "on"}
-
-            try:
-                await loop.run_in_executor(
-                    get_watermark_pool(),
-                    lambda: _watermark.prefetch_generator(
-                        allow_download=allow_download
-                    ),
-                )
-            except Exception:
-                # prefetch_generator swallows its own errors; this guards the
-                # setup half (imports, pool construction) so a broken warm-up
-                # is visible now, not as an unretrieved exception at shutdown.
-                logger.warning("Watermark preload task failed", exc_info=True)
-
-        app.state.watermark_preload_task = asyncio.create_task(_preload_watermark())
-
     # ── MCP session manager (Wave 2.2) ────────────────────────────────────
     # Run it in its OWN task owning the full enter→exit lifecycle (anyio
     # task-affinity, see _serve_mcp); only wait, with a timeout, for ready —
@@ -1369,20 +1315,8 @@ async def lifespan(app: FastAPI):
         getattr(app.state, "profile_reconcile_task", None),
         getattr(app.state, "preload_task", None),
         getattr(app.state, "capture_preload_task", None),
-        getattr(app.state, "watermark_preload_task", None),
         timeout=20.0,
     )
-    # The watermark warm-up runs on its dedicated 1-worker pool. Cancellation
-    # detaches the asyncio future but cannot kill a thread inside AudioSeal,
-    # so drain it fully before lifespan teardown reports completion.
-    try:
-        from services.model_manager import shutdown_watermark_pool as _wm_drain
-
-        _wm_drain()
-    except Exception:
-        # Best-effort drain: a failure here must not abort the remaining
-        # shutdown steps (model unload, MCP teardown) below.
-        logger.warning("Watermark pool drain failed at shutdown", exc_info=True)
     # Release every runtime that can retain model memory, then free allocator
     # caches. This includes alternate TTS engines, dictation and translation;
     # limiting shutdown to the shared OmniVoice model left those runtimes to

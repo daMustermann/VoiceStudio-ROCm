@@ -109,11 +109,6 @@ function DetailHero({
         </p>
         <div className="integration-detail-title-row">
           <h2 id="integration-detail-name">{entry.name}</h2>
-          {entry.featured && (
-            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-              {t('integrationCatalog.featured')}
-            </span>
-          )}
           {status}
         </div>
         <p className="integration-detail-tagline">

@@ -107,11 +107,6 @@ export function IntegrationsPage() {
                   <span className="integration-badge integration-badge--works">
                     {t('integrationCatalog.worksWith')}
                   </span>
-                  {entry.featured && (
-                    <span className="integration-badge integration-badge--featured">
-                      {t('integrationCatalog.featured')}
-                    </span>
-                  )}
                 </div>
                 {entry.capabilities.length > 0 && (
                   <p className="integration-card-capabilities">

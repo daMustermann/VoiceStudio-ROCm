@@ -1,4 +1,3 @@
-import { SupportSettings } from './support-settings';
 import { UpdateSettings } from './update-settings';
 import { MirrorSettings } from './mirror-settings';
 import { StorageSettings } from './storage-settings';
@@ -20,7 +19,6 @@ import { Link, useNavigate, useRouterState } from '@tanstack/react-router';
 import { runRendererTask } from '@/lib/global-error-recovery';
 import {
   ArrowLeftIcon,
-  ExternalLinkIcon,
   SettingsIcon,
   WifiIcon,
   Share2Icon,
@@ -46,7 +44,6 @@ import {
   BarChart3Icon,
   BracesIcon,
   StethoscopeIcon,
-  HeartHandshakeIcon,
   ClipboardCheckIcon,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -113,13 +110,6 @@ const extraSettings = [
     fields: ['updates.tab', 'updates.check_now'],
   },
   {
-    to: '/settings/support',
-    label: 'donate.title',
-    Icon: ExternalLinkIcon,
-    Component: SupportSettings,
-    fields: ['donate.title', 'contact.channels_label'],
-  },
-  {
     to: '/settings/network',
     label: 'settings.network',
     Icon: WifiIcon,
@@ -179,7 +169,7 @@ const extraSettings = [
     label: 'settings.privacy',
     Icon: ShieldCheckIcon,
     Component: PrivacySettings,
-    fields: ['settings.privacy', 'privacy.watermark_title', 'settings.history_retention'],
+    fields: ['settings.privacy', 'settings.history_retention'],
   },
   {
     to: '/settings/permissions',
@@ -407,9 +397,7 @@ export function SettingsPage() {
                   </Link>
                 );
               })}
-            {extraMatches
-              .filter(({ to }) => to !== '/settings/support')
-              .map(({ to, label, Icon }) => (
+            {extraMatches.map(({ to, label, Icon }) => (
                 <Link
                   key={to}
                   title={t(label)}
@@ -469,21 +457,6 @@ export function SettingsPage() {
           )}
         </div>
         <div className="shrink-0 space-y-1.5 border-t border-sidebar-border/50 bg-background/15 p-3">
-          <Link
-            to="/settings/support"
-            title={t('donate.title')}
-            aria-current={extra?.to === '/settings/support' ? 'page' : undefined}
-            className={cn(
-              buttonVariants({ variant: 'ghost' }),
-              'group relative w-full justify-start overflow-hidden border border-primary/20 bg-gradient-to-r from-primary/15 via-primary/8 to-transparent text-foreground shadow-[inset_0_1px_0_rgb(255_255_255/10%)] transition-[border-color,background-color,box-shadow] hover:border-primary/35 hover:from-primary/20 hover:shadow-[0_8px_24px_-16px_var(--primary)]',
-              extra?.to === '/settings/support' && 'border-primary/40 bg-primary/15',
-            )}
-          >
-            <HeartHandshakeIcon className="size-4 shrink-0 text-primary transition-transform duration-200 group-hover:scale-110 motion-reduce:transition-none" />
-            <span data-slot="settings-nav-label" className="min-w-0 flex-1 truncate text-left">
-              {t('donate.title')}
-            </span>
-          </Link>
           <Link
             to="/clone"
             title={t('preferences.back')}

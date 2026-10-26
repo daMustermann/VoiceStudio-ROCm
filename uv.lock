@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.11"
 resolution-markers = [
     "python_full_version >= '3.14' and platform_machine == 'x86_64' and sys_platform == 'darwin' and extra != 'group-9-omnivoice-cpu' and extra == 'group-9-omnivoice-cuda'",
@@ -481,24 +481,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/a1/4a/874ecf9b472f998130c2b5e145dcdb9f6131e84786111489103b66772143/audioread-3.1.0.tar.gz", hash = "sha256:1c4ab2f2972764c896a8ac61ac53e261c8d29f0c6ccd652f84e18f08a4cab190", size = 20082, upload-time = "2025-10-26T19:44:13.484Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/7e/16/fbe8e1e185a45042f7cd3a282def5bb8d95bb69ab9e9ef6a5368aa17e426/audioread-3.1.0-py3-none-any.whl", hash = "sha256:b30d1df6c5d3de5dcef0fb0e256f6ea17bdcf5f979408df0297d8a408e2971b4", size = 23143, upload-time = "2025-10-26T19:44:12.016Z" },
-]
-
-[[package]]
-name = "audioseal"
-version = "0.2.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "einops" },
-    { name = "numpy", version = "2.0.2", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version == '3.12.*' and sys_platform == 'linux') or (python_full_version == '3.12.*' and sys_platform == 'win32') or (sys_platform != 'linux' and sys_platform != 'win32' and extra == 'group-9-omnivoice-cpu' and extra == 'group-9-omnivoice-cuda') or (sys_platform == 'linux' and extra == 'group-9-omnivoice-cpu' and extra == 'group-9-omnivoice-cuda') or (sys_platform == 'win32' and extra == 'group-9-omnivoice-cpu' and extra == 'group-9-omnivoice-cuda')" },
-    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "(python_full_version != '3.12.*' and sys_platform == 'linux') or (python_full_version != '3.12.*' and sys_platform == 'win32') or (sys_platform != 'linux' and sys_platform != 'win32') or (sys_platform == 'linux' and extra == 'group-9-omnivoice-cpu' and extra == 'group-9-omnivoice-cuda') or (sys_platform == 'win32' and extra == 'group-9-omnivoice-cpu' and extra == 'group-9-omnivoice-cuda')" },
-    { name = "omegaconf" },
-    { name = "torch", version = "2.8.0", source = { registry = "https://pypi.org/simple" }, marker = "(platform_machine == 'aarch64' and sys_platform == 'linux') or (platform_machine == 'arm64' and sys_platform == 'linux') or (sys_platform != 'linux' and sys_platform != 'win32') or (sys_platform == 'linux' and extra == 'group-9-omnivoice-cpu' and extra == 'group-9-omnivoice-cuda') or (sys_platform == 'linux' and extra != 'group-9-omnivoice-cpu' and extra != 'group-9-omnivoice-cuda') or (sys_platform == 'win32' and extra == 'group-9-omnivoice-cpu' and extra == 'group-9-omnivoice-cuda') or (sys_platform == 'win32' and extra != 'group-9-omnivoice-cpu' and extra != 'group-9-omnivoice-cuda')" },
-    { name = "torch", version = "2.8.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(platform_machine != 'aarch64' and platform_machine != 'arm64' and sys_platform == 'linux' and extra == 'group-9-omnivoice-cpu') or (platform_machine == 'aarch64' and extra == 'group-9-omnivoice-cpu' and extra == 'group-9-omnivoice-cuda') or (platform_machine == 'arm64' and extra == 'group-9-omnivoice-cpu' and extra == 'group-9-omnivoice-cuda') or (sys_platform == 'win32' and extra == 'group-9-omnivoice-cpu') or (sys_platform != 'linux' and extra == 'group-9-omnivoice-cpu' and extra == 'group-9-omnivoice-cuda')" },
-    { name = "torch", version = "2.8.0+cu128", source = { registry = "https://download.pytorch.org/whl/cu128" }, marker = "(platform_machine != 'aarch64' and platform_machine != 'arm64' and sys_platform == 'linux' and extra == 'group-9-omnivoice-cuda') or (platform_machine == 'aarch64' and extra == 'group-9-omnivoice-cpu' and extra == 'group-9-omnivoice-cuda') or (platform_machine == 'arm64' and extra == 'group-9-omnivoice-cpu' and extra == 'group-9-omnivoice-cuda') or (sys_platform == 'win32' and extra == 'group-9-omnivoice-cuda') or (sys_platform != 'linux' and extra == 'group-9-omnivoice-cpu' and extra == 'group-9-omnivoice-cuda')" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/ba/63/7012f074ee592184c5dd2fd119b64b25233bbcc466c803e9d4bf95c64086/audioseal-0.2.0.tar.gz", hash = "sha256:569a16eb898748ea7f3f5d485e094e21ddcebd68314ad873051a79e9e5b708ae", size = 2572957, upload-time = "2025-12-17T13:43:00.651Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/06/6c/c8875d5e2e8b6b9cb06f483df35b81a2644e793dadd050b33b2d8a8e941d/audioseal-0.2.0-py3-none-any.whl", hash = "sha256:a5989d1e831177e09ba94ec6789ad28ffbd75a2b64e4463a44d92b81f72faf75", size = 63304, upload-time = "2025-12-17T13:42:57.525Z" },
 ]
 
 [[package]]
@@ -4182,11 +4164,11 @@ wheels = [
 name = "omnivoice"
 version = "0.5.7b2"
 source = { editable = "." }
+default-groups = ["cuda", "dev"]
 dependencies = [
     { name = "accelerate" },
     { name = "alembic" },
     { name = "argostranslate" },
-    { name = "audioseal" },
     { name = "boto3" },
     { name = "cryptography" },
     { name = "demucs", version = "4.0.1", source = { registry = "https://pypi.org/simple" }, marker = "(platform_machine == 'x86_64' and sys_platform == 'darwin') or (platform_machine != 'x86_64' and extra == 'group-9-omnivoice-cpu' and extra == 'group-9-omnivoice-cuda') or (sys_platform != 'darwin' and extra == 'group-9-omnivoice-cpu' and extra == 'group-9-omnivoice-cuda')" },
@@ -4298,7 +4280,6 @@ requires-dist = [
     { name = "accelerate" },
     { name = "alembic", specifier = ">=1.16" },
     { name = "argostranslate", specifier = ">=1.9.0" },
-    { name = "audioseal", specifier = ">=0.1.3" },
     { name = "boto3", specifier = ">=1.40" },
     { name = "cryptography", specifier = ">=41" },
     { name = "demucs", specifier = ">=4.0.1" },

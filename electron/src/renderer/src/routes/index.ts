@@ -45,7 +45,6 @@ const SettingsPage = lazyRouteComponent(
   () => import('@/features/settings/settings-page'),
   'SettingsPage',
 );
-const ProPage = lazyRouteComponent(() => import('@/features/pro/pro-page'), 'ProPage');
 
 export const rootRoute = createRootRoute({ component: AppShell });
 
@@ -233,22 +232,6 @@ export const storageRoute = createRoute({
   path: '/settings/storage',
   component: SettingsPage,
 });
-export const supportRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/settings/support',
-  validateSearch: (search: Record<string, unknown>): { compare?: boolean } => ({
-    compare: search.compare === true || search.compare === 'true' ? true : undefined,
-  }),
-  beforeLoad: ({ search }) => {
-    if (search.compare) throw redirect({ to: '/pro' });
-  },
-  component: SettingsPage,
-});
-export const proRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/pro',
-  component: ProPage,
-});
 export const updatesRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/settings/updates',
@@ -268,8 +251,6 @@ export const routeTree = rootRoute.addChildren([
   diagnosticsRoute,
   openApiRoute,
   updatesRoute,
-  supportRoute,
-  proRoute,
   storageRoute,
   privacyRoute,
   accountRoute,

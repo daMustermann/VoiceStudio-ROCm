@@ -79,12 +79,12 @@ it('badges every listed integration as working with VoiceStudio', () => {
   expect(container.textContent).not.toContain('directoryExamples.example');
 });
 
-it('badges only featured (sponsored) integrations', () => {
+it('does not advertise sponsored integration placements', () => {
   const { container } = render(<IntegrationsPage />);
   const card = (name: string) =>
     [...container.querySelectorAll('.integration-card')].find(
       (element) => element.querySelector('h3')?.textContent === name,
     )!;
-  expect(card('Twilio').querySelector('.integration-badge--featured')).not.toBeNull();
+  expect(card('Twilio').querySelector('.integration-badge--featured')).toBeNull();
   expect(card('Codex CLI').querySelector('.integration-badge--featured')).toBeNull();
 });

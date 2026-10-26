@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import { Link } from '@tanstack/react-router';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Switch } from '@/components/ui/switch';
 import { apiJson } from '@/lib/api/client';
 import { SettingsSection, SettingsRow } from './settings-layout';
 import { useSettingsAction } from './use-settings-action';
@@ -35,61 +34,9 @@ export function PrivacySettings() {
             {t('settings.translation')}
           </Link>
         </SettingsRow>
-        <PrivacyToggle kind="watermark" />
       </SettingsSection>
       <HistoryRetention />
     </>
-  );
-}
-interface PrivacyState {
-  audioseal_available?: boolean;
-  invisible_enabled?: boolean;
-}
-function PrivacyToggle({ kind }: { kind: 'watermark' }) {
-  const { t } = useTranslation();
-  const client = useQueryClient();
-  const action = useSettingsAction();
-  const key = ['privacy', kind];
-  const path = '/watermark/status';
-  const query = useQuery({
-    queryKey: key,
-    queryFn: ({ signal }) => apiJson<PrivacyState>(path, { signal }),
-  });
-  const state = query.data;
-  if (state && !state.audioseal_available) return null;
-  return (
-    <div>
-      <SettingsRow
-        id={'privacy-' + kind}
-        title={t('privacy.' + kind + '_title')}
-        description={t('privacy.' + kind + '_subtitle')}
-      >
-        <Switch
-          aria-label={t('privacy.' + kind + '_title')}
-          checked={!!state?.invisible_enabled}
-          disabled={!state || action.busy}
-          onCheckedChange={(enabled) =>
-            void action.run(async () => {
-              const next = await apiJson<PrivacyState>('/watermark/settings?invisible=' + enabled, {
-                method: 'POST',
-              });
-              client.setQueryData(key, (prior: PrivacyState | undefined) => ({
-                ...prior,
-                ...next,
-              }));
-            })
-          }
-        />
-      </SettingsRow>
-      {(query.isError || action.error) && (
-        <p role="alert" className="px-4 pb-3 text-sm text-destructive">
-          {t('common.error')}{' '}
-          <Button size="sm" variant="ghost" onClick={() => void query.refetch()}>
-            {t('common.retry')}
-          </Button>
-        </p>
-      )}
-    </div>
   );
 }
 export function HistoryRetention() {

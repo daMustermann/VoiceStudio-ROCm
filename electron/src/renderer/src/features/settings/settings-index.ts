@@ -29,7 +29,6 @@ export const SETTINGS_ENTRIES: SettingsEntry[] = [
   { to: '/settings/media', label: 'settings.audio_tools' },
   { to: '/settings/logs', label: 'settings.logs' },
   { to: '/settings/updates', label: 'updates.tab' },
-  { to: '/settings/support', label: 'donate.title' },
   { to: '/settings/diagnostics', label: 'about.diagnostics' },
   { to: '/settings/openapi', label: 'openapi.title' },
 ];

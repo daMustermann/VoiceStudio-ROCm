@@ -280,8 +280,48 @@ def test_preflight_amd_flags_warn_when_no_rocm_torch():
         assert any("rocm" in n.lower() for n in info["notes"])
 
 
+@pytest.mark.parametrize("hip,available,expected", [
+    ("10.1", True, "pass"),
+    ("10.1", False, "warn"),
+    (None, True, "warn"),
+])
+def test_preflight_radeon_rocm_status_matches_usable_hip(
+    monkeypatch, hip, available, expected,
+):
+    """An RX 7900 XTX is green only with working HIP, even on Windows."""
+    from types import SimpleNamespace
+    from api.routers.setup import wizard
+
+    if sys.platform == "darwin" and wizard._platform.machine() == "arm64":
+        pytest.skip("Apple Silicon probe precedes AMD detection")
+
+    def fake_run_cmd(args, timeout=2.0):
+        if args and args[0] == "rocm-smi":
+            return 0, "AMD Radeon RX 7900 XTX\n"
+        return -1, ""
+
+    fake_torch = SimpleNamespace(
+        version=SimpleNamespace(hip=hip),
+        cuda=SimpleNamespace(is_available=lambda: available),
+    )
+    with patch.object(wizard, "_run_cmd", side_effect=fake_run_cmd), \
+         patch.dict("sys.modules", {"torch": fake_torch}):
+        info = wizard._detect_gpu()
+
+    assert info["vendor"] == "amd"
+    assert info["device_name"] == "AMD Radeon RX 7900 XTX"
+    assert info["available"] is (expected == "pass")
+    assert info["backend"] == ("rocm" if expected == "pass" else "cpu")
+
+    monkeypatch.setattr(wizard, "_detect_gpu", lambda: info)
+    response = client_factory().get("/setup/preflight").json()
+    gpu = next(c for c in response["checks"] if c["id"] == "gpu")
+    assert gpu["status"] == expected
+    assert response["device"]["gpu_backend"] == info["backend"]
+
+
 @pytest.mark.parametrize("platform_, expect", [
-    ("win32", "audio.cpp"),
+    ("win32", "ROCm 10.1"),
     ("linux", "OMNIVOICE_TORCH_VARIANT=rocm"),
 ])
 def test_preflight_sees_a_radeon_without_rocm_smi(monkeypatch, platform_, expect):
